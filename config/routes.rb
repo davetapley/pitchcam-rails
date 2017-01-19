@@ -1,3 +1,3 @@
 Rails.application.routes.draw do
-  root 'pages#home'
+  root 'races#show'
 end
