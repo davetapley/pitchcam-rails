@@ -12,3 +12,4 @@ staging:
 
 production:
   <<: *default
+  url: <%= ENV['REDISTOGO_URL'] %>
