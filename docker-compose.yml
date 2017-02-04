@@ -4,7 +4,7 @@ services:
   postgres:
     image: 'postgres:9.5'
     environment:
-      POSTGRES_USER: 'pitchcam_rails'
+      POSTGRES_USER: 'pitchcam'
       POSTGRES_PASSWORD: 'yourpassword'
     ports:
       - '5432:5432'

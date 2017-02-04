@@ -3,7 +3,7 @@ include OpenCV
 
 class VideoChannel < ApplicationCable::Channel
   def subscribed
-    stream_for 'alice'
+    stream_for uuid
   end
 
   def start
@@ -18,13 +18,13 @@ class VideoChannel < ApplicationCable::Channel
     image = IplImage.load 'image.jpg'
 
     output = image.clone
-    output.put_text!('hello world', CvPoint2D32f.new(20, 20), CvFont.new(:simplex), CvColor::White)
+    output.put_text!(Time.current.strftime('%H:%M:%S'), CvPoint2D32f.new(40, 20), CvFont.new(:duplex), CvColor::White)
 
     tmp_file =  'output.png'
     output.save_image tmp_file
     output_encoded = Base64.strict_encode64 File.open(tmp_file, 'rb').read
     output_uri = "data:image/png;base64,#{output_encoded}"
 
-    VideoChannel.broadcast_to 'alice', imageUri: output_uri
+    VideoChannel.broadcast_to uuid, imageUri: output_uri
   end
 end

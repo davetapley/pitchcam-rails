@@ -1,17 +1,19 @@
 <%
  title "PitchCam"
  meta_description 'PitchCam : It is a thing'
- heading "Default Race"
+ heading "Training"
 %>
 
 <div class="row">
   <div class="col-sm-8">
-    <button type="submit" data-behavior="start-race" >Start race</button>
+    <input type="file" accept="video/*"/>
     <img id="latest">
-    <div id="webcam-video"></div>
+    <p id="message"></p>
+    <video id="training-video" controls></video>
   </div>
 
   <div class="col-sm-4">
     Here is some more
   </div>
 </div>
+
