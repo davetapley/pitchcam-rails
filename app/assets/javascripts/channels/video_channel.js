@@ -97,27 +97,15 @@ App.cable.subscriptions.create("VideoChannel", {
 
 
       training.addEventListener('play', function() {
-        training.classList.add('playing');
         this.perform("start");
         snap();
       }.bind(this));
-
-      training.addEventListener('pause', function() {
-        training.classList.remove('playing');
-      }.bind(this));
-
     }
-
 },
 
 received: function(data) {
   $("#latest").attr('src', data.imageUri);
-
-  var webcam = document.querySelector('#webcam-video')
-  var training = document.querySelector('#training-video')
-  if(webcam || (training && training.classList.contains('playing'))) {
-    snap();
-  }
+  snap();
 }
 });
 
