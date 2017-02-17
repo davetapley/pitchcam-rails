@@ -57,6 +57,8 @@ module PitchcamRails
     origins = ENV['ACTION_CABLE_ALLOWED_REQUEST_ORIGINS'].split(',')
     origins.map! { |url| /#{url}/ }
     config.action_cable.allowed_request_origins = origins
+
+    config.webpack.dev_server.manifest_host = ENV['WEBPACK_DEV_SERVER_HOST'] || 'localhost'
   end
 end
 

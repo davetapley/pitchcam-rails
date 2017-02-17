@@ -23,6 +23,7 @@ services:
     depends_on:
       - 'postgres'
       - 'redis'
+      - 'webpack'
     build: .
     ports:
       - '3000:3000'
@@ -53,6 +54,18 @@ services:
       - '.:/pitchcam_rails'
     env_file:
       - '.env'
+
+  webpack:
+    build:
+      context: .
+      dockerfile: Dockerfile.webpack
+    environment:
+      - NODE_ENV=development
+    command: npm run dev
+    volumes:
+      - .:/opt
+    ports:
+      - "3808:3808"
 
 volumes:
   redis:

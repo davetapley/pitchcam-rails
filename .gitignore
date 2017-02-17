@@ -20,3 +20,11 @@
 /vendor/bundle
 /public/assets/*
 .env
+# Added by vueport
+/node_modules
+/public/webpack
+/npm-debug.log
+
+/renderer/node_modules
+/renderer/npm-debug.log
+/renderer/bundle.server.js

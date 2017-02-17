@@ -3,6 +3,8 @@ source 'https://rubygems.org'
 # Looking to use the Edge version? gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 5.0.1'
 
+gem 'vueport'
+
 # Use Puma as the app server
 gem 'puma', '~> 3.0'
 
@@ -72,3 +74,5 @@ gem 'rails-assets-webcamjs', source: 'https://rails-assets.org'
 
 gem 'ruby-opencv'
 gem 'data_uri'
+
+gem 'webpack-rails'
