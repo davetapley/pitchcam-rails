@@ -1,12 +1,13 @@
 import Vue from 'vue'
-/*
-*  Import your components here.
-*  Your components directory is aliased as 'components'
-*  e.g.
-*
-import MyComponent from 'components/my-component'
-*/
+import ActionCable from 'actioncable'
+import axios from 'axios'
 
+import trainingVideo from 'components/training_video'
+
+const cable = ActionCable.createConsumer('ws://localhost:28080/cable')
+
+Vue.prototype.$http = axios
+Vue.prototype.$cable = cable
 
 export default function (template) {
   return new Vue({
@@ -17,6 +18,7 @@ export default function (template) {
     },
     // Then include them here:
     components: {
+      trainingVideo
     }
   })
 }
