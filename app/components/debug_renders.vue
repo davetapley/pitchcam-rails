@@ -1,13 +1,31 @@
 <template>
   <div class="container">
-    <div class="row" v-for="renderRow in renderRows">
-      <div class="col-sm-3" v-for="render in renderRow">
-        <h2>{{ render.description }}</h2>
-        <ul>
-          <li>Rendered at: {{ render.createdAt }}</li>
-          <li>Lag: {{ render.lag }}ms</li>
-        </ul>
-        <img :src="render.imageUri">
+    <div class="row" v-for="colorRow in colorRows">
+      <div class="col-sm-3" v-for="color in colorRow">
+        <h2>{{ color.name }}</h2>
+        <table>
+          <tr>
+            <td>Config</td>
+            <td>{{ color.config.updated_at }}</td>
+          </tr>
+          <tr><td>&nbsp;</td><td>low</td><td>high</td></tr>
+          <tr v-for="key in hsv">
+            <td>{{ key }}</td>
+            <td><input v-model="color.config[key][0]" @change="sendConfig" type="number" min="0" max="255"/></td>
+            <td><input v-model="color.config[key][1]" @change="sendConfig" type="number" min="0" max="255"/></td>
+          </tr>
+
+          <tr>
+            <td>At:</td>
+            <td>{{ color.image.createdAt | seconds }}</td>
+          </tr>
+          <tr>
+            <td>Lag: </td>
+            <td>{{ color.lag }}ms</td>
+          </tr>
+        </table>
+
+        <img :src="color.image.uri">
       </div>
     </div>
   </div>
@@ -23,31 +41,49 @@ export default {
   data () {
     return {
       channel: null,
-      renders: []
+      colors: []
     }
   },
   computed: {
-    renderRows: function renderRows () {
-      return _.chunk(this.renders, 4)
+    colorRows: function colorRows () {
+      return _.chunk(this.colors, 4)
+    },
+    hsv: function hsv () {
+      return ['hue', 'saturation', 'value']
+    }
+  },
+  methods: {
+    sendConfig: function sendConfig () {
+      const colors = _.map(this.colors, color => color.config)
+      this.channel.perform('config', { new_config: { colors } })
+    }
+  },
+  filters: {
+    seconds: function time (ms) {
+      const date = new Date(ms)
+      return `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
     }
   },
   created: function created () {
     const that = this
     this.channel = this.$cable.subscriptions.create({ channel: 'DebugRenderChannel' }, {
       received (data) {
-        const render = that.renders.find((r) => {
-          const match = r.description === data.description
+        const config = JSON.parse(data.config)
+        const name = config.name
+
+        const color = that.colors.find((c) => {
+          const match = c.name === name
           return match
         })
 
-        const lag = Date.now() - new Date(data.createdAt)
+        const image = JSON.parse(data.image)
+        const lag = Date.now() - new Date(image.createdAt)
 
-        if (render === undefined) {
-          that.renders.push(Object.assign(data, { lag }))
-        } else if (data.createdAt > render.createdAt) {
-          render.createdAt = data.createdAt
-          render.lag = lag
-          render.imageUri = data.imageUri
+        if (color === undefined) {
+          that.colors.push({ name, lag, config, image })
+        } else {
+          color.lag = lag
+          color.image = image
         }
       }
     })

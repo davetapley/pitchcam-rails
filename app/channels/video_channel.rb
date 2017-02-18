@@ -1,15 +1,11 @@
 require "opencv"
 include OpenCV
 
-CONFIG = Config.new
-
 class VideoChannel < ApplicationCable::Channel
   def subscribed
     stream_for uuid
-  end
-
-  def start
-    puts 'start'
+    config = Configs.instance.get uuid
+    VideoChannel.broadcast_to uuid, action: 'ready', config_updated_at: config.updated_at
   end
 
   def frame(data)
@@ -26,16 +22,17 @@ class VideoChannel < ApplicationCable::Channel
     output_encoded = Base64.strict_encode64 File.open(tmp_file, 'rb').read
     output_uri = "data:image/png;base64,#{output_encoded}"
 
-    DebugRenderChannel.broadcast_to uuid, description: 'f0', imageUri: output_uri, createdAt: data['created_at']
-
-    CONFIG.colors.each do |color|
-      output = color.map image
+    config = Configs.instance.get uuid
+    config.colors.each do |color|
+      output = color.hsv_map image
 
       tmp_file =  'tmp/output.png'
       output.save_image tmp_file
       output_encoded = Base64.strict_encode64 File.open(tmp_file, 'rb').read
       output_uri = "data:image/png;base64,#{output_encoded}"
-      DebugRenderChannel.broadcast_to uuid, description: "fHSV #{color.name}", imageUri: output_uri, createdAt: data['created_at']
+
+      image_attrs = { uri: output_uri, createdAt: data['created_at'] }
+      DebugRenderChannel.broadcast_to uuid, config: color.to_json, image: image_attrs.to_json
     end
 
     VideoChannel.broadcast_to uuid, action: 'snap'

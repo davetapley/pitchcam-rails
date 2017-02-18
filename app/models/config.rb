@@ -1,34 +1,73 @@
-WorldTransform = Struct.new :origin, :scale, :rotation
+require 'opencv'
+include OpenCV
+
+class WorldTransform
+  include ActiveModel::Serializers::JSON
+
+  attr_accessor :origin_x, :origin_y, :scale, :rotation
+
+  def attributes=(hash)
+    hash.each do |key, value|
+      send("#{key}=", value)
+    end
+  end
+
+  def attributes
+    instance_values
+  end
+
+  def origin
+    CvPoint.new origin_x, origin_y
+  end
+end
 
 class Config
-  attr_reader :world_transform, :colors, :color_window_on
+  include ActiveModel::Serializers::JSON
+
+  attr_reader :updated_at, :world_transform, :colors, :color_window_on
 
   def initialize
-    @config = YAML.load_file 'config.yml'
+    @updated_at = Time.current
 
-    @color_window_on = @config['color_window_on']
-
-    origin = CvPoint.new 356, 178
-    scale = 93
-    rotation = 0
-    @world_transform = WorldTransform.new origin, scale, rotation
-
-    @colors = @config['colors'].map do |color, _|
-      hsv_low = CvScalar.new get_attr(color, 'hue', 'low'), get_attr(color, 'saturation', 'low'), get_attr(color, 'value', 'low')
-      hsv_high = CvScalar.new get_attr(color, 'hue', 'high'), get_attr(color, 'saturation', 'high'), get_attr(color, 'value', 'high')
-      Color.new color, hsv_low, hsv_high
+    @world_transform = WorldTransform.new.tap do |transform|
+      transform.origin_x = 365
+      transform.origin_y = 178
+      transform.scale = 93
+      transform.rotation = 0
     end
+
+    @colors = %w(red green blue).map do |color_name|
+      Color.new.tap do |color|
+        color.name = color_name
+        %w(hue saturation value).each do |key|
+          color.send "#{key}=", [0, 255]
+        end
+      end
+    end
+  end
+
+  def attributes=(hash)
+    new_world_transform = hash.delete 'world_transform'
+    world_transform.attributes = new_world_transform if new_world_transform.present?
+
+    @colors = hash.delete('colors').map do |color_attrs|
+      Color.new.tap do |new_color|
+        new_color.attributes = color_attrs
+      end
+    end
+
+    hash.each do |key, value|
+      send("#{key}=", value)
+    end
+
+    @updated_at = Time.current
+  end
+
+  def attributes
+    instance_values.except 'updated_at'
   end
 
   def color_names
     colors.map(&:name)
-  end
-
-  private
-
-  def get_attr(color, name, kind)
-    color_attr = @config.dig 'colors', color, name, kind
-    default_attr = @config.dig('defaults', name, kind)
-    color_attr || default_attr
   end
 end
