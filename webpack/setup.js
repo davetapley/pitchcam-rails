@@ -2,6 +2,7 @@ import Vue from 'vue'
 import ActionCable from 'actioncable'
 import axios from 'axios'
 
+import debugRenders from 'components/debug_renders'
 import trainingVideo from 'components/training_video'
 
 const cable = ActionCable.createConsumer('ws://localhost:28080/cable')
@@ -18,6 +19,7 @@ export default function (template) {
     },
     // Then include them here:
     components: {
+      debugRenders,
       trainingVideo
     }
   })

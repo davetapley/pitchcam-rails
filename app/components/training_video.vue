@@ -4,7 +4,6 @@
     <p>{{fileMessage}}</p>
     <p>{{nextPoint}}</p>
     <video id="training-video" controls ref="video" @loadedmetadata="setDefaultTrackBoundary" @click="setTrackBoundary" @play="snap"></video>
-    <img id="latest" :src="trainingRenderUri">
   </div>
 </template>
 
@@ -76,8 +75,9 @@ export default {
     const that = this
     this.videoChannel = this.$cable.subscriptions.create({ channel: 'VideoChannel' }, {
       received (data) {
-        that.trainingRenderUri = data.imageUri
-        that.snap()
+        if (data.action === 'snap') {
+          that.snap()
+        }
       }
     })
   }

@@ -25,6 +25,7 @@ class VideoChannel < ApplicationCable::Channel
     output_encoded = Base64.strict_encode64 File.open(tmp_file, 'rb').read
     output_uri = "data:image/png;base64,#{output_encoded}"
 
-    VideoChannel.broadcast_to uuid, imageUri: output_uri
+    VideoChannel.broadcast_to uuid, action: 'snap'
+    DebugRenderChannel.broadcast_to uuid, description: 'default', imageUri: output_uri, createdAt: Time.current
   end
 end
