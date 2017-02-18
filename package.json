@@ -32,6 +32,7 @@
     "eslint-plugin-import": "^2.2.0",
     "extract-text-webpack-plugin": "^1.0.1",
     "handlebars": "^4.0.5",
+    "lodash": "^4.17.4",
     "ora": "^0.4.0",
     "stats-webpack-plugin": "^0.2.1",
     "style-loader": "^0.13.1",

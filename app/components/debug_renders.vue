@@ -1,17 +1,15 @@
 <template>
   <div class="container">
-  <div class="row" v-for="render in renders">
-    <h2>{{ render.description }}</h2>
-    <div class="col-sm-8">
-      <img :src="render.imageUri">
+    <div class="row" v-for="renderRow in renderRows">
+      <div class="col-sm-3" v-for="render in renderRow">
+        <h2>{{ render.description }}</h2>
+        <ul>
+          <li>Rendered at: {{ render.createdAt }}</li>
+          <li>Lag: {{ render.lag }}ms</li>
+        </ul>
+        <img :src="render.imageUri">
+      </div>
     </div>
-    <div class="col-sm-4">
-      <ul>
-        <li>Rendered at: {{ render.createdAt }}</li>
-        <li>Lag: {{ render.lag }}ms</li>
-      </ul>
-    </div>
-  </div>
   </div>
 </template>
 
@@ -19,6 +17,8 @@
 </style>
 
 <script>
+import _ from 'lodash'
+
 export default {
   data () {
     return {
@@ -26,7 +26,10 @@ export default {
       renders: []
     }
   },
-  methods: {
+  computed: {
+    renderRows: function renderRows () {
+      return _.chunk(this.renders, 4)
+    }
   },
   created: function created () {
     const that = this
