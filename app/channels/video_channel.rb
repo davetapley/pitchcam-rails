@@ -14,7 +14,6 @@ class VideoChannel < ApplicationCable::Channel
 
   def frame(data)
     uri = URI::Data.new data['image_uri']
-    puts uri.content_type
 
     File.open('tmp/image.jpg', 'wb') { |f| f.write(uri.data) }
     image = IplImage.load 'tmp/image.jpg'
@@ -27,7 +26,7 @@ class VideoChannel < ApplicationCable::Channel
     output_encoded = Base64.strict_encode64 File.open(tmp_file, 'rb').read
     output_uri = "data:image/png;base64,#{output_encoded}"
 
-    DebugRenderChannel.broadcast_to uuid, description: 'f0', imageUri: output_uri, createdAt: Time.current
+    DebugRenderChannel.broadcast_to uuid, description: 'f0', imageUri: output_uri, createdAt: data['created_at']
 
     CONFIG.colors.each do |color|
       output = color.map image
@@ -36,7 +35,7 @@ class VideoChannel < ApplicationCable::Channel
       output.save_image tmp_file
       output_encoded = Base64.strict_encode64 File.open(tmp_file, 'rb').read
       output_uri = "data:image/png;base64,#{output_encoded}"
-      DebugRenderChannel.broadcast_to uuid, description: "fHSV #{color.name}", imageUri: output_uri, createdAt: Time.current
+      DebugRenderChannel.broadcast_to uuid, description: "fHSV #{color.name}", imageUri: output_uri, createdAt: data['created_at']
     end
 
     VideoChannel.broadcast_to uuid, action: 'snap'

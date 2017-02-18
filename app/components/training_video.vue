@@ -62,7 +62,8 @@ export default {
       canvas.getContext('2d').drawImage(videoElement, this.topLeft.x, this.topLeft.y, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height)
 
       const imageUri = canvas.toDataURL('img/jpeg')
-      this.videoChannel.perform('frame', { image_uri: imageUri })
+      const createdAt = Date.now()
+      this.videoChannel.perform('frame', { image_uri: imageUri, created_at: createdAt })
     }
   },
   computed: {

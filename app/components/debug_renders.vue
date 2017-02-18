@@ -40,7 +40,7 @@ export default {
           return match
         })
 
-        const lag = Date.now() - Date.parse(data.createdAt)
+        const lag = Date.now() - new Date(data.createdAt)
 
         if (render === undefined) {
           that.renders.push(Object.assign(data, { lag }))
