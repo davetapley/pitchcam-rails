@@ -26,6 +26,19 @@ class Config
 
   attr_reader :updated_at, :world_transform, :colors, :color_window_on
 
+  def self.from_disk
+    Config.new.tap do |new_config|
+      f =  'config.json'
+      new_config.attributes = JSON.parse File.read(f) if File.exist?(f)
+    end
+  end
+
+  def to_disk
+    File.open('config.json','w') do |file|
+      file.puts to_json
+    end
+  end
+
   def initialize
     @updated_at = Time.current
 

@@ -5,17 +5,6 @@
         <h2>{{ color.name }}</h2>
         <table>
           <tr>
-            <td>Config</td>
-            <td>{{ color.config.updated_at }}</td>
-          </tr>
-          <tr><td>&nbsp;</td><td>low</td><td>high</td></tr>
-          <tr v-for="key in hsv">
-            <td>{{ key }}</td>
-            <td><input v-model="color.config[key][0]" @change="sendConfig" type="number" min="0" max="255"/></td>
-            <td><input v-model="color.config[key][1]" @change="sendConfig" type="number" min="0" max="255"/></td>
-          </tr>
-
-          <tr>
             <td>At:</td>
             <td>{{ color.image.createdAt | seconds }}</td>
           </tr>
@@ -47,15 +36,6 @@ export default {
   computed: {
     colorRows: function colorRows () {
       return _.chunk(this.colors, 4)
-    },
-    hsv: function hsv () {
-      return ['hue', 'saturation', 'value']
-    }
-  },
-  methods: {
-    sendConfig: function sendConfig () {
-      const colors = _.map(this.colors, color => color.config)
-      this.channel.perform('config', { new_config: { colors } })
     }
   },
   filters: {
@@ -80,7 +60,7 @@ export default {
         const lag = Date.now() - new Date(image.createdAt)
 
         if (color === undefined) {
-          that.colors.push({ name, lag, config, image })
+          that.colors.push({ name, lag, image })
         } else {
           color.lag = lag
           color.image = image

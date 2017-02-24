@@ -2,6 +2,7 @@ import Vue from 'vue'
 import ActionCable from 'actioncable'
 import axios from 'axios'
 
+import config from 'components/config'
 import debugRenders from 'components/debug_renders'
 import trainingVideo from 'components/training_video'
 
@@ -19,6 +20,7 @@ export default function (template) {
     },
     // Then include them here:
     components: {
+      config,
       debugRenders,
       trainingVideo
     }
