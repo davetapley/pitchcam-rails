@@ -61,7 +61,7 @@ services:
       dockerfile: Dockerfile.webpack
     environment:
       - NODE_ENV=development
-    command: npm run dev
+    command: yarn run dev
     volumes:
       - .:/opt
     ports:
