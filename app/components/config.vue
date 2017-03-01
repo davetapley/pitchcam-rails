@@ -1,9 +1,29 @@
 <template>
   <div class="container">
     <button @click=saveConfig>Save</button>
+    <div class="row">
+      <h2>World transform</h2>
+      <table>
+        <tr >
+          <td>Origin x</td>
+          <td><input v-model="world_transform.origin_x" @change="sendConfig" type="number" min="0" max="600"/></td>
+          <td>Origin y</td>
+          <td><input v-model="world_transform.origin_y" @change="sendConfig" type="number" min="0" max="600"/></td>
+        </tr>
+        <tr >
+          <td>Scale</td>
+          <td><input v-model="world_transform.scale" @change="sendConfig" type="number" min="1" max="100"/></td>
+          <td>Rotation</td>
+          <td><input v-model="world_transform.rotation" @change="sendConfig" type="number" min="0" max="360"/></td>
+        </tr>
+        <tr >
+        </tr>
+      </table>
+    </div>
     <div class="row" v-for="colorRow in colorRows">
+    <h2>Colors</h2>
       <div class="col-sm-3" v-for="color in colorRow">
-        <h2>{{ color.name }}</h2>
+        <h3>{{ color.name }}</h3>
         <table>
           <tr><td>&nbsp;</td><td>low</td><td>high</td></tr>
           <tr v-for="key in hsv">
@@ -27,6 +47,7 @@ export default {
   data () {
     return {
       channel: null,
+      world_transform: { origin_x: 0, origin_y: 0 },
       colors: []
     }
   },
@@ -40,7 +61,7 @@ export default {
   },
   methods: {
     sendConfig: function sendConfig () {
-      this.channel.perform('update', { new_config: { colors: this.colors } })
+      this.channel.perform('update', { new_config: { world_transform: this.world_transform, colors: this.colors } })
     },
     saveConfig: function sendConfig () {
       this.channel.perform('save')
@@ -54,6 +75,7 @@ export default {
       },
       received: function received (data) {
         const config = data.config
+        that.world_transform = config.world_transform
         that.colors.push(...config.colors)
       }
     })

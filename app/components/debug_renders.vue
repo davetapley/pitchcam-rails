@@ -1,5 +1,22 @@
 <template>
   <div class="container">
+    <div class="row">
+    <div class="col-sm-12" v-if="track.image">
+          <h2>Track</h2>
+          <table>
+            <tr>
+              <td>At:</td>
+              <td>{{ track.image.createdAt | seconds }}</td>
+            </tr>
+            <tr>
+              <td>Lag: </td>
+              <td>{{ track.lag }}ms</td>
+            </tr>
+          </table>
+
+          <img :src="track.image.uri">
+      </div>
+    </div>
     <div class="row" v-for="colorRow in colorRows">
       <div class="col-sm-3" v-for="color in colorRow">
         <h2>{{ color.name }}</h2>
@@ -30,6 +47,7 @@ export default {
   data () {
     return {
       channel: null,
+      track: {},
       colors: []
     }
   },
@@ -48,22 +66,26 @@ export default {
     const that = this
     this.channel = this.$cable.subscriptions.create({ channel: 'DebugRenderChannel' }, {
       received (data) {
-        const config = JSON.parse(data.config)
-        const name = config.name
-
-        const color = that.colors.find((c) => {
-          const match = c.name === name
-          return match
-        })
-
         const image = JSON.parse(data.image)
         const lag = Date.now() - new Date(image.createdAt)
 
-        if (color === undefined) {
-          that.colors.push({ name, lag, image })
+        if (data.color) {
+          const name = data.name
+
+          const color = that.colors.find((c) => {
+            const match = c.name === name
+            return match
+          })
+
+          if (color === undefined) {
+            that.colors.push({ name, lag, image })
+          } else {
+            color.lag = lag
+            color.image = image
+          }
         } else {
-          color.lag = lag
-          color.image = image
+          that.track.lag = lag
+          that.track.image = image
         }
       }
     })

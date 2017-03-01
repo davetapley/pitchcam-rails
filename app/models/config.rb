@@ -17,6 +17,7 @@ class WorldTransform
   end
 
   def origin
+    puts origin_x, origin_y
     CvPoint.new origin_x, origin_y
   end
 end
@@ -62,6 +63,7 @@ class Config
   def attributes=(hash)
     new_world_transform = hash.delete 'world_transform'
     world_transform.attributes = new_world_transform if new_world_transform.present?
+    @track = nil
 
     @colors = hash.delete('colors').map do |color_attrs|
       Color.new.tap do |new_color|
@@ -77,10 +79,14 @@ class Config
   end
 
   def attributes
-    instance_values.except 'updated_at'
+    instance_values.except 'updated_at', 'track'
   end
 
   def color_names
     colors.map(&:name)
+  end
+
+  def track
+    @track ||= Track.new world_transform
   end
 end
