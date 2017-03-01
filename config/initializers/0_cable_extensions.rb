@@ -1,7 +1,9 @@
 module BroadcasterExtensions
   def broadcast(message)
     def message.inspect
-      Hash[map { |k,v| [k, v.to_s.starts_with?('data:') ? 'data: [SNIP]' : v] }].inspect
+      Hash[map do |k,v|
+        [k, v.to_s.gsub(/['"]data:[^'"]*/, 'data: [SNIP]' )]
+      end].inspect
     end
     super
   end
