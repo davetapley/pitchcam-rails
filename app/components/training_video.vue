@@ -54,16 +54,18 @@ export default {
     },
 
     snap: function snap () {
-      const canvas = document.createElement('CANVAS')
-      canvas.width = this.bottomRight.x - this.topLeft.x
-      canvas.height = this.bottomRight.y - this.topLeft.y
-
       const videoElement = this.$refs.video
-      canvas.getContext('2d').drawImage(videoElement, this.topLeft.x, this.topLeft.y, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height)
+      if (videoElement.readyState > 0) {
+        const canvas = document.createElement('CANVAS')
+        canvas.width = this.bottomRight.x - this.topLeft.x
+        canvas.height = this.bottomRight.y - this.topLeft.y
 
-      const imageUri = canvas.toDataURL('img/jpeg')
-      const createdAt = Date.now()
-      this.videoChannel.perform('frame', { image_uri: imageUri, created_at: createdAt })
+        canvas.getContext('2d').drawImage(videoElement, this.topLeft.x, this.topLeft.y, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height)
+
+        const imageUri = canvas.toDataURL('img/jpeg')
+        const createdAt = Date.now()
+        this.videoChannel.perform('frame', { image_uri: imageUri, created_at: createdAt })
+      }
     }
   },
   computed: {
@@ -75,6 +77,9 @@ export default {
   created: function created () {
     const that = this
     this.videoChannel = this.$cable.subscriptions.create({ channel: 'VideoChannel' }, {
+      connected () {
+        that.snap()
+      },
       received (data) {
         if (data.action === 'snap') {
           that.snap()
