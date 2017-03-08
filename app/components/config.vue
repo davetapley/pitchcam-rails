@@ -2,6 +2,8 @@
   <div class="container">
     <button @click=saveConfig>Save</button>
     <div class="row">
+      <h2>Track layout</h2>
+      <td><input v-model="layout" size=50 @change="sendConfig"/>
       <h2>World transform</h2>
       <table>
         <tr >
@@ -48,6 +50,7 @@ export default {
     return {
       channel: null,
       world_transform: { origin_x: 0, origin_y: 0 },
+      layout: '',
       colors: []
     }
   },
@@ -61,7 +64,7 @@ export default {
   },
   methods: {
     sendConfig: function sendConfig () {
-      this.channel.perform('update', { new_config: { world_transform: this.world_transform, colors: this.colors } })
+      this.channel.perform('update', { new_config: { layout: this.layout, world_transform: this.world_transform, colors: this.colors } })
     },
     saveConfig: function sendConfig () {
       this.channel.perform('save')
@@ -76,6 +79,8 @@ export default {
       received: function received (data) {
         const config = data.config
         that.world_transform = config.world_transform
+        that.layout = config.layout
+        that.colors.splice(0)
         that.colors.push(...config.colors)
       }
     })

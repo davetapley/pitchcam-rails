@@ -25,7 +25,7 @@ class Track
 
   CAR_RADIUS_TRACK = 0.1
 
-  def initialize(world_transform)
+  def initialize(world_transform, layout)
     @car_radius_world = CAR_RADIUS_TRACK * world_transform.scale
 
     start_origin = world_transform.origin
@@ -41,8 +41,6 @@ class Track
 
       segment = Segment.new index + 1, origin, angle, world_transform, tile
       segments << segment
-
-      puts "#{segment.world_to_local origin}"
     end
   end
 
@@ -71,5 +69,18 @@ class Track
   def world_from_position(position)
     segment = segments[position.segment_index]
     segment.world_from_position position.to_segment_local
+  end
+
+  private
+
+  def tile_for_direction(direction)
+    case direction.downcase
+    when 's'
+      Straight
+    when 'l', 'r'
+      Corner
+    else
+      raise "#{ direction  } is not a track layout direction"
+    end
   end
 end

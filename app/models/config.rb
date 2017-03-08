@@ -17,7 +17,6 @@ class WorldTransform
   end
 
   def origin
-    puts origin_x, origin_y
     CvPoint.new origin_x, origin_y
   end
 end
@@ -25,6 +24,7 @@ end
 class Config
   include ActiveModel::Serializers::JSON
 
+  attr_accessor :layout
   attr_reader :updated_at, :world_transform, :colors, :color_window_on
 
   def self.from_disk
@@ -87,6 +87,6 @@ class Config
   end
 
   def track
-    @track ||= Track.new world_transform
+    @track ||= Track.new world_transform, layout.split(' ')
   end
 end
