@@ -29,7 +29,7 @@ class Track
     @car_radius_world = CAR_RADIUS_TRACK * world_transform.scale
 
     start_origin = world_transform.origin
-    angle = 0
+    angle = (world_transform.rotation / 180.0) * Math::PI
 
     raise 'First track direction must be straight' unless tile_for_direction(layout.first) == Straight
     @segments = [Segment.new(0, start_origin, angle, false, world_transform, Straight)]
