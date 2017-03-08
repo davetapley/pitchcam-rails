@@ -24,6 +24,10 @@ class Segment
     canvas.circle!(angle_position, 2, color: CvColor::Blue)
   end
 
+  def render_mask_to(mask)
+    render_to mask, tile.mask
+  end
+
   def render_progress_to(canvas, color, position)
     render_to canvas, tile.progress_line(position.p), color
   end
@@ -81,13 +85,15 @@ class Segment
   end
 
   def render_to(canvas, shapes, color = CvColor::White)
+    segment_canvas = canvas.clone
+
     shapes.each do |type, *points|
       from = local_to_world points[0]
 
       case type
       when :line
         to = local_to_world points[1]
-        canvas.line! from, to, thickness: 1, color: color
+        segment_canvas.line! from, to, thickness: 1, color: color
       when :arc
         origin = local_to_world points[1]
         radius = points[2] * world_transform.scale
@@ -95,11 +101,24 @@ class Segment
         angle_deg = (-angle / Math::PI) * 180
         start_angle_deg = mirror_x ? 90 : 0
         end_angle_deg = start_angle_deg + 90
-        canvas.ellipse! origin, axes, angle_deg, start_angle_deg, end_angle_deg, thickness: 1, color: color
+        segment_canvas.ellipse! origin, axes, angle_deg, start_angle_deg, end_angle_deg, thickness: 1, color: color
+      when :rectangle
+        to = local_to_world points[1]
+        segment_canvas.rectangle! from, to, color: 255, thickness: -1
+      when :circle
+        radius = points[1] * world_transform.scale
+        color = points[2] == :black ? 0 : 255
+        segment_canvas.circle! from, radius, color: color, thickness: -1
       else
         raise "Can't render #{type}"
       end
-
     end
+
+    segment_mask = CvMat.new canvas.size.height, canvas.size.width, :cv8uc1, 1
+    segment_mask.set_zero!
+    tl = local_to_world CvPoint2D32f.new(-0.5, -0.5)
+    br = local_to_world CvPoint2D32f.new 0.5, 0.5
+    segment_mask.rectangle! tl, br, color: 255, thickness: -1
+    segment_canvas.copy canvas, segment_mask
   end
 end

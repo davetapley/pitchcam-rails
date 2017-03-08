@@ -43,6 +43,12 @@ class Straight
     ]
   end
 
+  def mask
+    p0 = CvPoint2D32f.new LEFT, FRONT
+    p1 = CvPoint2D32f.new RIGHT, BACK
+    [[:rectangle, p0, p1]]
+  end
+
   def progress_line(progress)
     p0 = CvPoint2D32f.new LEFT, (progress * HEIGHT) + FRONT
     p1 = CvPoint2D32f.new RIGHT, (progress * HEIGHT) + FRONT

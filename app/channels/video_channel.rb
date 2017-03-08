@@ -2,6 +2,7 @@ require 'opencv'
 include OpenCV
 
 class VideoChannel < ApplicationCable::Channel
+
   def subscribed
     stream_for uuid
     config = Configs.instance.get uuid
@@ -15,11 +16,19 @@ class VideoChannel < ApplicationCable::Channel
 
     config = Configs.instance.get uuid
 
+    # Track mask
+    track_mask = CvMat.new image.size.height, image.size.width, :cv8uc1, 1
+    track_mask.set_zero!
+    config.track.render_mask_to track_mask
+
+    masked_track_image = image.clone.set CvColor::Black, track_mask.not
+
     # Track outline debug
-    track_outline_image = image.clone
-    config.track.render_outline_to track_outline_image
+    debug_track_render = masked_track_image.clone
+    config.track.render_outline_to debug_track_render
+
     tmp_file =  'tmp/output.png'
-    track_outline_image.save_image tmp_file
+    debug_track_render.save_image tmp_file
     output_encoded = Base64.strict_encode64 File.open(tmp_file, 'rb').read
     output_uri = "data:image/png;base64,#{output_encoded}"
 
@@ -27,7 +36,7 @@ class VideoChannel < ApplicationCable::Channel
     DebugRenderChannel.broadcast_to uuid, color: false, image: image_attrs.to_json
 
     config.colors.each do |color|
-      output = color.hsv_map image
+      output = color.hsv_map masked_track_image
 
       tmp_file =  'tmp/output.png'
       output.save_image tmp_file

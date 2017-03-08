@@ -66,6 +66,14 @@ class Corner
     ]
   end
 
+  def mask
+    pO = CvPoint2D32f.new -0.5, -0.5
+    [
+      [:circle, pO, 0.8],
+      [:circle, pO, 0.2, :black]
+    ]
+  end
+
   def progress_line(progress)
     angle = progress * (Math::PI / 2.0)
 
