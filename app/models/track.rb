@@ -30,16 +30,19 @@ class Track
 
     start_origin = world_transform.origin
     angle = 0
-    @segments = [Segment.new(0, start_origin, angle, world_transform, Straight)]
 
-    tiles = [Corner, Straight, Corner, Straight, Corner, Straight, Corner]
-    tiles.each_with_index do |tile, index|
+    raise 'First track direction must be straight' unless tile_for_direction(layout.first) == Straight
+    @segments = [Segment.new(0, start_origin, angle, false, world_transform, Straight)]
+
+    layout.from(1).each_with_index do |direction, index|
       prev_segment = segments.last
+      tile = tile_for_direction direction
 
-      origin = prev_segment.next_world_origin
-      angle = (angle + prev_segment.next_angle) % (Math::PI * 2)
+      angle += prev_segment.next_angle
+      angle += Math::PI if prev_segment.mirror_x
+      angle = angle % (Math::PI * 2)
 
-      segment = Segment.new index + 1, origin, angle, world_transform, tile
+      segment = Segment.new index + 1, prev_segment.next_world_origin, angle, direction.downcase == 'l', world_transform, tile
       segments << segment
     end
   end

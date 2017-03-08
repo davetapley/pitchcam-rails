@@ -1,25 +1,29 @@
 class Straight
   # Longest side in y axis
 
-  WIDTH = 1
-  HEIGHT = 1.64
+  LEFT = -0.3
+  RIGHT = 0.3
+  WIDTH = 0.6
+  FRONT = -0.5
+  BACK = 0.5
+  HEIGHT = 1
 
   def inside?(point)
-    0 < point.x && point.x < WIDTH && 0 < point.y && point.y < HEIGHT
+    LEFT < point.x && point.x < RIGHT && FRONT < point.y && point.y < BACK
   end
 
   def next_local_origin
-    CvPoint2D32f.new 0, HEIGHT
+    CvPoint2D32f.new 0, 1
   end
 
   def position_from_local(point)
-    p = point.y / HEIGHT # progress
-    d = point.x / WIDTH # drift
+    p = (point.y - FRONT) / HEIGHT # progress
+    d = (point.x - LEFT) / WIDTH # drift
     Track::Postition.new p, d
   end
 
   def local_from_position(position)
-    CvPoint2D32f.new (position.d * WIDTH), (position.p * HEIGHT)
+    CvPoint2D32f.new (position.d * WIDTH) + LEFT, (position.p * HEIGHT) + FRONT
   end
 
   def next_angle
@@ -27,10 +31,10 @@ class Straight
   end
 
   def outline
-    p0 = CvPoint2D32f.new 0, 0
-    p1 = CvPoint2D32f.new WIDTH, 0
-    p2 = CvPoint2D32f.new WIDTH, HEIGHT
-    p3 = CvPoint2D32f.new 0, HEIGHT
+    p0 = CvPoint2D32f.new LEFT, FRONT
+    p1 = CvPoint2D32f.new RIGHT, FRONT
+    p2 = CvPoint2D32f.new RIGHT, BACK
+    p3 = CvPoint2D32f.new LEFT, BACK
     [
       [:line, p0, p1],
       [:line, p1, p2],
@@ -40,8 +44,8 @@ class Straight
   end
 
   def progress_line(progress)
-    p0 = CvPoint2D32f.new 0, (progress * HEIGHT)
-    p1 = CvPoint2D32f.new WIDTH, (progress * HEIGHT)
+    p0 = CvPoint2D32f.new LEFT, (progress * HEIGHT) + FRONT
+    p1 = CvPoint2D32f.new RIGHT, (progress * HEIGHT) + FRONT
 
     [[:line, p0, p1]]
   end

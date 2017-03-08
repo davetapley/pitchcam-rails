@@ -1,21 +1,27 @@
 class Segment
 
-  attr_reader :index, :world_origin, :angle, :world_transform, :tile, :bottom_left_world
+  attr_reader :index, :world_origin, :angle, :world_transform, :tile, :bottom_left_world, :mirror_x
 
-  def initialize(index, world_origin, angle, world_transform, tile_class)
+  def initialize(index, prev_segment_next_world_origin, angle, mirror_x, world_transform, tile_class)
     @index = index
-    @world_origin = world_origin
-    @angle = angle
-    @world_transform = world_transform
     @tile = tile_class.new
+
+    @angle = angle
+    @mirror_x = mirror_x
+    @world_transform = world_transform
+    @world_origin = prev_segment_next_world_origin
   end
 
 
   def render_outline_to(canvas)
     render_to canvas, tile.outline
 
-    label_position = local_to_world CvPoint2D32f.new 0.5, 0.5
+    label_position = local_to_world CvPoint2D32f.new 0, 0
+    canvas.circle!(label_position, 4, color: CvColor::Red)
     canvas.put_text!(index.to_s, label_position, CvFont.new(:simplex), CvColor::White)
+
+    angle_position = local_to_world CvPoint2D32f.new 0, 0.25
+    canvas.circle!(angle_position, 2, color: CvColor::Blue)
   end
 
   def render_progress_to(canvas, color, position)
@@ -62,8 +68,11 @@ class Segment
     cos_a = Math.cos -angle
     sin_a = Math.sin -angle
 
-    x_r = (point.x * cos_a) - (point.y * sin_a)
-    y_r = (point.y * cos_a) + (point.x * sin_a)
+    point_x = point.x * (mirror_x ? -1 : 1)
+    point_y = point.y
+
+    x_r = (point_x * cos_a) - (point_y * sin_a)
+    y_r = (point_y * cos_a) + (point_x * sin_a)
 
     world_scale = world_transform.scale
     x = (x_r * world_scale) + world_origin.x
@@ -82,9 +91,11 @@ class Segment
       when :arc
         origin = local_to_world points[1]
         radius = points[2] * world_transform.scale
-        axes = CvSize.new radius, radius
+        axes = CvSize.new radius , radius
         angle_deg = (-angle / Math::PI) * 180
-        canvas.ellipse! origin, axes, angle_deg, 0, 90, thickness: 1, color: color
+        start_angle_deg = mirror_x ? 90 : 0
+        end_angle_deg = start_angle_deg + 90
+        canvas.ellipse! origin, axes, angle_deg, start_angle_deg, end_angle_deg, thickness: 1, color: color
       else
         raise "Can't render #{type}"
       end
