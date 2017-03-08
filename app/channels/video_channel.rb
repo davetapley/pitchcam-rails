@@ -14,9 +14,12 @@ class VideoChannel < ApplicationCable::Channel
     image = IplImage.load 'tmp/image.jpg'
 
     config = Configs.instance.get uuid
-    config.track.render_outline_to image
+
+    # Track outline debug
+    track_outline_image = image.clone
+    config.track.render_outline_to track_outline_image
     tmp_file =  'tmp/output.png'
-    image.save_image tmp_file
+    track_outline_image.save_image tmp_file
     output_encoded = Base64.strict_encode64 File.open(tmp_file, 'rb').read
     output_uri = "data:image/png;base64,#{output_encoded}"
 
