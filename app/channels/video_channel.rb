@@ -36,10 +36,11 @@ class VideoChannel < ApplicationCable::Channel
     DebugRenderChannel.broadcast_to uuid, color: false, image: image_attrs.to_json
 
     config.colors.each do |color|
-      output = color.hsv_map masked_track_image
+      color_mask = color.hsv_map masked_track_image
+      masked_color_image = image.clone.set CvColor::Black, color_mask.not
 
       tmp_file =  'tmp/output.png'
-      output.save_image tmp_file
+      masked_color_image.save_image tmp_file
       output_encoded = Base64.strict_encode64 File.open(tmp_file, 'rb').read
       output_uri = "data:image/png;base64,#{output_encoded}"
 
