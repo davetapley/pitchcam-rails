@@ -13,15 +13,15 @@ class Segment
   end
 
 
-  def render_outline_to(canvas)
-    render_to canvas, tile.outline
+  def render_outline_to(canvas, color)
+    render_to canvas, tile.outline, color
 
     label_position = local_to_world CvPoint2D32f.new 0, 0
     canvas.circle!(label_position, 4, color: CvColor::Red)
     canvas.put_text!(index.to_s, label_position, CvFont.new(:simplex), CvColor::White)
 
-    angle_position = local_to_world CvPoint2D32f.new 0, 0.25
-    canvas.circle!(angle_position, 2, color: CvColor::Blue)
+    #angle_position = local_to_world CvPoint2D32f.new -0.3, -0.5
+    #canvas.circle!(angle_position, 2, color: CvColor::Blue)
   end
 
   def render_mask_to(mask)

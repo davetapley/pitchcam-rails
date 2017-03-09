@@ -1,7 +1,8 @@
 class Corner
+  WALL_WIDTH = 0.1
   INNER = -0.3
-  OUTER = 0.3
-  WIDTH = 0.6
+  OUTER = 0.3 - WALL_WIDTH
+  WIDTH = 0.6 - WALL_WIDTH
 
   # Turning from y = -0.5 to x = -0.5, origin at x = -0.5, y = -0.5
 
@@ -61,16 +62,16 @@ class Corner
     [
       [:line, p0, p1], # y = - 0.5
       [:line, p2, p3], # x = - 0.5
-      [:arc, p1, pO,  0.8], # outer
-      [:arc, p0, pO, 0.2]  # inner
+      [:arc, p1, pO,  0.5 + INNER + WIDTH], # outer
+      [:arc, p0, pO, 0.5 + INNER]  # inner
     ]
   end
 
   def mask
     pO = CvPoint2D32f.new -0.5, -0.5
     [
-      [:circle, pO, 0.8],
-      [:circle, pO, 0.2, :black]
+      [:circle, pO, 0.5 + INNER + WIDTH], # outer
+      [:circle, pO, 0.5 + INNER, :black]  # inner
     ]
   end
 

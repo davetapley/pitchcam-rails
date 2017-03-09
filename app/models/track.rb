@@ -39,10 +39,11 @@ class Track
       tile = tile_for_direction direction
 
       angle += prev_segment.next_angle
-      angle += Math::PI if prev_segment.mirror_x
+      angle += Math::PI if prev_segment.tile.is_a?(Corner) && prev_segment.mirror_x
       angle = angle % (Math::PI * 2)
 
-      segment = Segment.new index + 1, prev_segment.next_world_origin, angle, direction.downcase == 'l', world_transform, tile
+      mirror_x =  %w(slw l).include? direction.downcase
+      segment = Segment.new index + 1, prev_segment.next_world_origin, angle, mirror_x, world_transform, tile
       segments << segment
     end
   end
@@ -51,8 +52,8 @@ class Track
     segments.any? { |segment| segment.inside? point }
   end
 
-  def render_outline_to(canvas)
-    segments.each { |segment| segment.render_outline_to canvas }
+  def render_outline_to(canvas, color)
+    segments.each { |segment| segment.render_outline_to canvas, color }
   end
 
   def render_mask_to(mask)
@@ -82,7 +83,7 @@ class Track
 
   def tile_for_direction(direction)
     case direction.downcase
-    when 's'
+    when 'slw', 'srw'
       Straight
     when 'l', 'r'
       Corner
