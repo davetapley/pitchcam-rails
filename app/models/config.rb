@@ -64,6 +64,7 @@ class Config
     new_world_transform = hash.delete 'world_transform'
     world_transform.attributes = new_world_transform if new_world_transform.present?
     @track = nil
+    @image_processor = nil
 
     @colors = hash.delete('colors').map do |color_attrs|
       Color.new.tap do |new_color|
@@ -88,5 +89,9 @@ class Config
 
   def track
     @track ||= Track.new world_transform, layout.split(' ')
+  end
+
+  def image_processor
+    @image_processor ||= ImageProcessor.new track, colors
   end
 end

@@ -30,6 +30,10 @@ class VideoChannel < ApplicationCable::Channel
     image_attrs = { uri: output_uri, createdAt: data['created_at'] }
     DebugRenderChannel.broadcast_to uuid, color: false, image: image_attrs.to_json
 
+    image_processor = config.image_processor
+    dirty_colors = image_processor.handle_image masked_track_image
+    DebugRenderChannel.broadcast_to uuid, update: dirty_colors if dirty_colors.present?
+
     config.colors.each do |color|
       color_mask = color.hsv_map masked_track_image
       masked_color_image = image.clone.set CvColor::White, color_mask.not
@@ -41,11 +45,10 @@ class VideoChannel < ApplicationCable::Channel
       output_uri = "data:image/png;base64,#{output_encoded}"
 
       image_attrs = { uri: output_uri, createdAt: data['created_at'] }
-      DebugRenderChannel.broadcast_to uuid, color: true, name: color.name, image: image_attrs.to_json
+      positions = { world: image_processor.colors_world_positions[color], track: image_processor.colors_track_positions[color] }
+      DebugRenderChannel.broadcast_to uuid, color: true, name: color.name, image: image_attrs.to_json, positions: positions.to_json
     end
 
-
-    #dirty_colors = image_processor.handle_image image
 
     VideoChannel.broadcast_to uuid, action: 'snap'
   end

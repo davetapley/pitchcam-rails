@@ -1,20 +1,20 @@
 <template>
   <div class="container">
     <div class="row">
-    <div class="col-sm-12" v-if="track.image">
-          <h2>Track</h2>
-          <table>
-            <tr>
-              <td>At:</td>
-              <td>{{ track.image.createdAt | seconds }}</td>
-            </tr>
-            <tr>
-              <td>Lag: </td>
-              <td>{{ track.lag }}ms</td>
-            </tr>
-          </table>
+      <div class="col-sm-12" v-if="track.image">
+        <h2>Track</h2>
+        <table>
+          <tr>
+            <td>At:</td>
+            <td>{{ track.image.createdAt | seconds }}</td>
+          </tr>
+          <tr>
+            <td>Lag: </td>
+            <td>{{ track.lag }}ms</td>
+          </tr>
+        </table>
 
-          <img :src="track.image.uri">
+        <img :src="track.image.uri">
       </div>
     </div>
     <div class="row" v-for="colorRow in colorRows">
@@ -29,10 +29,21 @@
             <td>Lag: </td>
             <td>{{ color.lag }}ms</td>
           </tr>
+          <tr>
+            <td>World:</td>
+            <td>{{ color.positions.world | coords('x', 'y', 0) }}</td>
+          </tr>
+          <tr>
+            <td>Track:</td>
+            <td>{{ color.positions.track | coords('p', 'd', 2) }}</td>
+          </tr>
         </table>
 
         <img :src="color.image.uri">
       </div>
+    </div>
+    <div class="row" v-for="update in updates">
+      <p>{{update}}</p>
     </div>
   </div>
 </template>
@@ -48,7 +59,8 @@ export default {
     return {
       channel: null,
       track: {},
-      colors: []
+      colors: [],
+      updates: []
     }
   },
   computed: {
@@ -60,32 +72,46 @@ export default {
     seconds: function time (ms) {
       const date = new Date(ms)
       return `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
+    },
+    coords: function coords (obj, axis1, axis2, round) {
+      if (obj === null) {
+        return 'none'
+      }
+
+      return `(${_.round(obj[axis1], round)}, ${_.round(obj[axis2], round)})`
     }
   },
   created: function created () {
     const that = this
     this.channel = this.$cable.subscriptions.create({ channel: 'DebugRenderChannel' }, {
       received (data) {
-        const image = JSON.parse(data.image)
-        const lag = Date.now() - new Date(image.createdAt)
+        if (data.image) {
+          const image = JSON.parse(data.image)
+          const lag = Date.now() - new Date(image.createdAt)
 
-        if (data.color) {
-          const name = data.name
+          if (data.color) {
+            const name = data.name
 
-          const color = that.colors.find((c) => {
-            const match = c.name === name
-            return match
-          })
+            const color = that.colors.find((c) => {
+              const match = c.name === name
+              return match
+            })
 
-          if (color === undefined) {
-            that.colors.push({ name, lag, image })
+            const positions = JSON.parse(data.positions)
+
+            if (color === undefined) {
+              that.colors.push({ name, lag, image, positions })
+            } else {
+              color.lag = lag
+              color.image = image
+              color.positions = positions
+            }
           } else {
-            color.lag = lag
-            color.image = image
+            that.track.lag = lag
+            that.track.image = image
           }
-        } else {
-          that.track.lag = lag
-          that.track.image = image
+        } else if (data.update) {
+          that.updates.unshift(data.update)
         }
       }
     })

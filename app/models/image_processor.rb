@@ -6,9 +6,8 @@ class ImageProcessor
     @track = track
     @colors = colors
 
-    color_names = colors.map(&:name)
-    @colors_world_positions = Hash[color_names.map { |color| [color, nil] }]
-    @colors_track_positions = Hash[color_names.map { |color| [color, nil] }]
+    @colors_world_positions = {}
+    @colors_track_positions = {}
 
     @dirty_start = nil
   end
@@ -17,7 +16,7 @@ class ImageProcessor
     @dirty_colors = [] if @dirty_start.nil?
 
     colors.each do |color|
-      hough = color.map(image).hough_circles CV_HOUGH_GRADIENT, 2, 5, 200, 40
+      hough = color.hsv_map(image).hough_circles CV_HOUGH_GRADIENT, 2, 5, 200, 40
       hough = hough.to_a.reject { |circle| circle.radius > track.car_radius_world * 1.5 }
 
       if hough.size > 0
