@@ -104,7 +104,9 @@ class Segment
         segment_canvas.ellipse! origin, axes, angle_deg, start_angle_deg, end_angle_deg, thickness: 1, color: color
       when :rectangle
         to = local_to_world points[1]
-        segment_canvas.rectangle! from, to, color: 255, thickness: -1
+        tr = local_to_world CvPoint2D32f.new points[0].x, points[1].y
+        bl = local_to_world CvPoint2D32f.new points[1].x, points[0].y
+        segment_canvas.fill_poly! [[from, tr, to, bl]], color: 255, thickness: -1
       when :circle
         radius = points[1] * world_transform.scale
         color = points[2] == :black ? 0 : 255
@@ -117,8 +119,10 @@ class Segment
     segment_mask = CvMat.new canvas.size.height, canvas.size.width, :cv8uc1, 1
     segment_mask.set_zero!
     tl = local_to_world CvPoint2D32f.new(-0.5, -0.5)
-    br = local_to_world CvPoint2D32f.new 0.5, 0.5
-    segment_mask.rectangle! tl, br, color: 255, thickness: -1
+    tr = local_to_world CvPoint2D32f.new(0.5, -0.5)
+    bl = local_to_world CvPoint2D32f.new(-0.5, 0.5)
+    br = local_to_world CvPoint2D32f.new(0.5, 0.5)
+    segment_mask.fill_poly! [[tl, tr, br, bl]], color: 255
     segment_canvas.copy canvas, segment_mask
   end
 end
