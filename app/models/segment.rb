@@ -84,6 +84,14 @@ class Segment
     CvPoint.new x, y
   end
 
+  def world_roi
+    tl = local_to_world CvPoint2D32f.new(-0.5, -0.5)
+    tr = local_to_world CvPoint2D32f.new(0.5, -0.5)
+    bl = local_to_world CvPoint2D32f.new(-0.5, 0.5)
+    br = local_to_world CvPoint2D32f.new(0.5, 0.5)
+    [tl, tr, br, bl]
+  end
+
   def render_to(canvas, shapes, color = CvColor::White)
     segment_canvas = canvas.clone
 
@@ -118,11 +126,7 @@ class Segment
 
     segment_mask = CvMat.new canvas.size.height, canvas.size.width, :cv8uc1, 1
     segment_mask.set_zero!
-    tl = local_to_world CvPoint2D32f.new(-0.5, -0.5)
-    tr = local_to_world CvPoint2D32f.new(0.5, -0.5)
-    bl = local_to_world CvPoint2D32f.new(-0.5, 0.5)
-    br = local_to_world CvPoint2D32f.new(0.5, 0.5)
-    segment_mask.fill_poly! [[tl, tr, br, bl]], color: 255
+    segment_mask.fill_poly! [world_roi], color: 255
     segment_canvas.copy canvas, segment_mask
   end
 end

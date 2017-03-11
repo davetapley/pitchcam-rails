@@ -10,11 +10,12 @@ class VideoChannel < ApplicationCable::Channel
   end
 
   def frame(data)
+    config = Configs.instance.get uuid
+
     uri = URI::Data.new data['image_uri']
     File.open('tmp/image.jpg', 'wb') { |f| f.write(uri.data) }
     image = IplImage.load 'tmp/image.jpg'
 
-    config = Configs.instance.get uuid
 
     # Track mask
     track_mask = CvMat.new image.size.height, image.size.width, :cv8uc1, 1

@@ -1,7 +1,7 @@
 require 'opencv'
 include OpenCV
 
-class WorldTransform
+class Transform
   include ActiveModel::Serializers::JSON
 
   attr_accessor :origin_x, :origin_y, :scale, :rotation
@@ -25,7 +25,7 @@ class Config
   include ActiveModel::Serializers::JSON
 
   attr_accessor :layout
-  attr_reader :updated_at, :world_transform, :colors, :color_window_on
+  attr_reader :updated_at, :world_transform, :colors, :color_window_on, :track, :frame_roi
 
   def self.from_disk
     Config.new.tap do |new_config|
@@ -43,7 +43,7 @@ class Config
   def initialize
     @updated_at = Time.current
 
-    @world_transform = WorldTransform.new.tap do |transform|
+    @world_transform = Transform.new.tap do |transform|
       transform.origin_x = 365
       transform.origin_y = 178
       transform.scale = 93
@@ -63,8 +63,6 @@ class Config
   def attributes=(hash)
     new_world_transform = hash.delete 'world_transform'
     world_transform.attributes = new_world_transform if new_world_transform.present?
-    @track = nil
-    @image_processor = nil
 
     @colors = hash.delete('colors').map do |color_attrs|
       Color.new.tap do |new_color|
@@ -76,19 +74,40 @@ class Config
       send("#{key}=", value)
     end
 
+    @track = Track.new world_transform, layout.split(' ')
+    @image_processor = nil
     @updated_at = Time.current
   end
 
+  def set_start_line(left, right, frame_width, frame_height)
+    frame_transform = Transform.new.tap do |t|
+      t.origin_x = (left.x + right.x) / 2
+      t.origin_y = (left.y + right.y) / 2
+
+      angle = Math.atan2 (left.x - right.x), (left.y - right.y)
+      t.rotation = ((angle / (Math::PI / 2.0)) * 360) + 270
+
+      width = Math.sqrt((left.x - right.x).abs**2 + (left.y - right.y).abs**2) #91
+      t.scale = width * (1/0.6)
+    end
+
+    frame_track = Track.new frame_transform, layout.split(' ')
+    @frame_roi = frame_track.roi
+    binding.pry
+
+    @world_transform = frame_transform
+    @world_transform.origin_x -= frame_roi.x
+    @world_transform.origin_y -= frame_roi.y
+
+    @image_processor = nil
+  end
+
   def attributes
-    instance_values.except 'updated_at', 'track'
+    instance_values.except 'updated_at', 'track', 'frame_roi'
   end
 
   def color_names
     colors.map(&:name)
-  end
-
-  def track
-    @track ||= Track.new world_transform, layout.split(' ')
   end
 
   def image_processor

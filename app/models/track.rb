@@ -29,7 +29,7 @@ class Track
     @car_radius_world = CAR_RADIUS_TRACK * world_transform.scale
 
     start_origin = world_transform.origin
-    angle = (world_transform.rotation / 180.0) * Math::PI
+    angle = world_transform.rotation * Math::PI / 180.0
 
     raise 'First track direction must be straight' unless tile_for_direction(layout.first) == Straight
     @segments = [Segment.new(0, start_origin, angle, false, world_transform, Straight)]
@@ -77,6 +77,18 @@ class Track
   def world_from_position(position)
     segment = segments[position.segment_index]
     segment.world_from_position position.to_segment_local
+  end
+
+  ROI = Struct.new :x, :y, :width, :height
+
+  def roi
+    points = segments.map { |segment| segment.world_roi }.flatten 1
+    xs = points.map(&:x)
+    ys = points.map(&:y)
+
+    tl = CvPoint.new xs.min, ys.min
+    br = CvPoint.new xs.max, ys.max
+    ROI.new tl.x, tl.y, br.x - tl.x, br.y - tl.y
   end
 
   private
