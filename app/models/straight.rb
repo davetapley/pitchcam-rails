@@ -1,10 +1,10 @@
 class Straight
   # Longest side in y axis
 
-  WALL_WIDTH = 0.1
-  LEFT = -0.3 + WALL_WIDTH
-  RIGHT = 0.3
-  WIDTH = 0.6 - WALL_WIDTH
+  WALL_WIDTH = 0.06
+  LEFT = -0.31 + WALL_WIDTH
+  RIGHT = 0.31
+  WIDTH = 0.62 - WALL_WIDTH
   FRONT = -0.5
   BACK = 0.5
   HEIGHT = 1

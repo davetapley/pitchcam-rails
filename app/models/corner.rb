@@ -1,8 +1,8 @@
 class Corner
-  WALL_WIDTH = 0.1
-  INNER = -0.3
-  OUTER = 0.3 - WALL_WIDTH
-  WIDTH = 0.6 - WALL_WIDTH
+  WALL_WIDTH = 0.06
+  INNER = -0.31
+  OUTER = 0.31 - WALL_WIDTH
+  WIDTH = 0.62 - WALL_WIDTH
 
   # Turning from y = -0.5 to x = -0.5, origin at x = -0.5, y = -0.5
 
