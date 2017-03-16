@@ -66,9 +66,12 @@ class Config
     @track = nil
     @image_processor = nil
 
-    @colors = hash.delete('colors').map do |color_attrs|
-      Color.new.tap do |new_color|
-        new_color.attributes = color_attrs
+    new_colors = hash.delete 'colors'
+    if new_colors.present?
+      @colors = new_colors.map do |color_attrs|
+        Color.new.tap do |new_color|
+          new_color.attributes = color_attrs
+        end
       end
     end
 

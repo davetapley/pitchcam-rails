@@ -11,6 +11,7 @@ class ConfigChannel < ApplicationCable::Channel
   def update(data)
     config = Configs.instance.get uuid
     config.attributes = data['new_config']
+    ConfigChannel.broadcast_to uuid, config: config
   end
 
   def save

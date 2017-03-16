@@ -1,9 +1,13 @@
 <template>
   <div>
     <input type="file" accept="video/*" @change="onFileChange" />
-    <p>{{fileMessage}}</p>
-    <p>{{nextPoint}}</p>
-    <video id="training-video" controls ref="video" @loadedmetadata="setDefaultTrackBoundary" @click="setTrackBoundary" @play="snap"></video>
+    <input type="radio" id="boundary" value="boundary" v-model="clickMode" @change="resetClickMode">
+    <label for="boundary">Set boundary</label>
+    <input type="radio" id="origin" value="origin" v-model="clickMode" @change="resetClickMode">
+    <label for="origin">Set origin</label>
+    <p>{{nextClick}}</p>
+    <p>{{boundaryStatus}}</p>
+    <video id="training-video" controls ref="video" @loadedmetadata="setDefaultTrackBoundary" @click="click" @play="snap"></video>
   </div>
 </template>
 
@@ -14,11 +18,11 @@
 export default {
   data () {
     return {
-      fileMessage: '',
-      nextClickIsTopLeft: true,
-      topLeft: { x: undefined, y: undefined },
-      bottomRight: { x: undefined, y: undefined },
+      clickMode: 'boundary',
+      prevClick: undefined,
+      boundary: { topLeft: undefined, bottomRight: undefined },
       videoChannel: null,
+      configChannel: null,
       trainingRenderUri: 'data:image/png;base64,'
     }
   },
@@ -39,28 +43,48 @@ export default {
       videoElement.src = fileURL
     },
 
-    setDefaultTrackBoundary: function setDefaultTrackBoundary () {
-      const videoElement = this.$refs.video
-      this.topLeft = { x: 0, y: 0 }
-      this.bottomRight = { x: videoElement.videoWidth, y: videoElement.videoHeight }
+    resetClickMode: function resetClickMode () {
+      this.prevClick = undefined
     },
 
-    setTrackBoundary: function setTrackBoundary (event) {
+    setDefaultTrackBoundary: function setDefaultTrackBoundary () {
+      const videoElement = this.$refs.video
+      this.boundary.topLeft = { x: 0, y: 0 }
+      this.boundary.bottomRight = { x: videoElement.videoWidth, y: videoElement.videoHeight }
+    },
+
+    click: function click (event) {
       const rect = this.$refs.video.getBoundingClientRect()
-      const point = this.nextClickIsTopLeft ? this.topLeft : this.bottomRight
-      this.nextClickIsTopLeft = !this.nextClickIsTopLeft
-      point.x = event.clientX - rect.left
-      point.y = event.clientY - rect.top
+      const point = { x: event.clientX - rect.left, y: event.clientY - rect.top }
+
+      if (this.clickMode === 'boundary') {
+        if (this.prevClick === undefined) {
+          this.prevClick = point
+        } else {
+          this.boundary.topLeft = this.prevClick
+          this.boundary.bottomRight = point
+          this.prevClick = undefined
+        }
+      } else if (this.clickMode === 'origin') {
+        const topLeft = this.boundary.topLeft
+        const boundedOrigin = { origin_x: point.x - topLeft.x, origin_y: point.y - topLeft.y }
+        this.configChannel.perform('update', { new_config: { world_transform: boundedOrigin } })
+      }
     },
 
     snap: function snap () {
       const videoElement = this.$refs.video
-      if (videoElement.readyState > 0) {
-        const canvas = document.createElement('CANVAS')
-        canvas.width = this.bottomRight.x - this.topLeft.x
-        canvas.height = this.bottomRight.y - this.topLeft.y
+      if (videoElement && videoElement.readyState > 0) {
+        const width = this.boundary.bottomRight.x - this.boundary.topLeft.x
+        const height = this.boundary.bottomRight.y - this.boundary.topLeft.y
 
-        canvas.getContext('2d').drawImage(videoElement, this.topLeft.x, this.topLeft.y, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height)
+        const canvas = document.createElement('CANVAS')
+        canvas.width = width
+        canvas.height = height
+
+        const srcX = this.boundary.topLeft.x
+        const srcY = this.boundary.topLeft.y
+        canvas.getContext('2d').drawImage(videoElement, srcX, srcY, width, height, 0, 0, width, height)
 
         const imageUri = canvas.toDataURL('img/jpeg')
         const createdAt = Date.now()
@@ -69,9 +93,20 @@ export default {
     }
   },
   computed: {
-    nextPoint: function nextPoint () {
-      const where = this.nextClickIsTopLeft ? 'top left' : 'bottom right'
-      return `Click ${where}`
+    nextClick: function nextClick () {
+      if (this.clickMode === 'boundary') {
+        const where = this.prevClick === undefined ? 'top left' : 'bottom right'
+        return `Click ${where}`
+      }
+      return 'Click origin'
+    },
+
+    boundaryStatus: function boundaryStatus () {
+      if (this.boundary.topLeft === undefined) {
+        return 'Boundary undefined'
+      }
+
+      return `Boundary from ${this.boundary.topLeft.x}, ${this.boundary.topLeft.y} to ${this.boundary.bottomRight.x}, ${this.boundary.bottomRight.y}`
     }
   },
   created: function created () {
@@ -86,6 +121,7 @@ export default {
         }
       }
     })
+    this.configChannel = this.$cable.subscriptions.create({ channel: 'ConfigChannel' }, {})
   }
 }
 </script>
