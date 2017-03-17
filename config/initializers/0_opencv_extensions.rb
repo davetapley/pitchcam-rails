@@ -6,8 +6,8 @@ module CvPointExtensions
     "(#{ x.round 2 }, #{ y.round 2 })"
   end
 
-  def to_json
-    { x: x, y: y }.to_json
+  def as_json(opts)
+    { x: x, y: y }.as_json opts
   end
 end
 
