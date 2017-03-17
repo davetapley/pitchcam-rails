@@ -7,7 +7,7 @@
     <label for="origin">Set origin</label>
     <p>{{nextClick}}</p>
     <p>{{boundaryStatus}}</p>
-    <video id="training-video" controls ref="video" @loadedmetadata="setDefaultTrackBoundary" @click="click" @play="snap"></video>
+    <video id="training-video" controls loop muted ref="video" @loadedmetadata="setDefaultTrackBoundary" @click="click" @play="snap"></video>
   </div>
 </template>
 
