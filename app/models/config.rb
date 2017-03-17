@@ -25,6 +25,7 @@ class Config
   include ActiveModel::Serializers::JSON
 
   attr_accessor :layout
+  attr_writer :perspective
   attr_reader :updated_at, :world_transform, :colors, :color_window_on
 
   def self.from_disk
@@ -58,6 +59,8 @@ class Config
         end
       end
     end
+
+    @perspective = []
   end
 
   def attributes=(hash)
@@ -83,7 +86,7 @@ class Config
   end
 
   def attributes
-    instance_values.except 'updated_at', 'track'
+    instance_values.except 'updated_at', 'track', 'image_processor'
   end
 
   def color_names
@@ -96,5 +99,11 @@ class Config
 
   def image_processor
     @image_processor ||= ImageProcessor.new track, colors
+  end
+
+  def perspective
+    @perspective.map do |point|
+      CvPoint.new point['x'], point['y']
+    end
   end
 end

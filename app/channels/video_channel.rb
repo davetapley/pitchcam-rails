@@ -16,11 +16,16 @@ class VideoChannel < ApplicationCable::Channel
 
     config = Configs.instance.get uuid
 
+    if config.perspective.present?
+      warp = CvMat.get_perspective_transform config.perspective, config.track.segments.first.world_roi
+      image = image.warp_perspective warp
+    end
+
     # Track mask
     track_mask = CvMat.new image.size.height, image.size.width, :cv8uc1, 1
     track_mask.set_zero!
     config.track.render_mask_to track_mask
-    masked_track_image = image.clone.set CvColor::White, track_mask.not
+    masked_track_image = image.clone #.set CvColor::White, track_mask.not
 
     tmp_file =  'tmp/output.png'
     masked_track_image.save_image tmp_file

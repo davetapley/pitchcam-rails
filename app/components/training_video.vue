@@ -1,13 +1,21 @@
 <template>
   <div>
     <input type="file" accept="video/*" @change="onFileChange" />
+    <video id="training-video" controls ref="video" @loadedmetadata="setDefaultTrackBoundary" @click="click" @play="snap"></video>
+    <br>
+
+    <span>Click for:</span>
+
     <input type="radio" id="boundary" value="boundary" v-model="clickMode" @change="resetClickMode">
-    <label for="boundary">Set boundary</label>
+    <label for="boundary">boundary</label>
+
     <input type="radio" id="origin" value="origin" v-model="clickMode" @change="resetClickMode">
-    <label for="origin">Set origin</label>
+    <label for="origin">origin</label>
+
+    <input type="radio" id="perspective" value="perspective" v-model="clickMode" @change="resetClickMode">
+    <label for="perspective">perspective</label>
     <p>{{nextClick}}</p>
     <p>{{boundaryStatus}}</p>
-    <video id="training-video" controls ref="video" @loadedmetadata="setDefaultTrackBoundary" @click="click" @play="snap"></video>
   </div>
 </template>
 
@@ -15,11 +23,13 @@
 </style>
 
 <script>
+import _ from 'lodash'
+
 export default {
   data () {
     return {
       clickMode: 'boundary',
-      prevClick: undefined,
+      prevClicks: [],
       boundary: { topLeft: undefined, bottomRight: undefined },
       videoChannel: null,
       configChannel: null,
@@ -44,7 +54,7 @@ export default {
     },
 
     resetClickMode: function resetClickMode () {
-      this.prevClick = undefined
+      this.prevClicks.splice(0)
     },
 
     setDefaultTrackBoundary: function setDefaultTrackBoundary () {
@@ -58,17 +68,29 @@ export default {
       const point = { x: event.clientX - rect.left, y: event.clientY - rect.top }
 
       if (this.clickMode === 'boundary') {
-        if (this.prevClick === undefined) {
-          this.prevClick = point
+        if (this.prevClicks.length === 0) {
+          this.prevClicks.push(point)
         } else {
-          this.boundary.topLeft = this.prevClick
+          this.boundary.topLeft = this.prevClicks[0]
           this.boundary.bottomRight = point
-          this.prevClick = undefined
+          this.prevClicks.splice(0)
         }
       } else if (this.clickMode === 'origin') {
         const topLeft = this.boundary.topLeft
         const boundedOrigin = { origin_x: point.x - topLeft.x, origin_y: point.y - topLeft.y }
         this.configChannel.perform('update', { new_config: { world_transform: boundedOrigin } })
+      } else if (this.clickMode === 'perspective') {
+        if (this.prevClicks.length < 3) {
+          this.prevClicks.push(point)
+        } else {
+          const topLeft = this.boundary.topLeft
+          const boundedPoint = function boundedPoint (canvasPoint) {
+            return { x: canvasPoint.x - topLeft.x, y: canvasPoint.y - topLeft.y }
+          }
+          const boundedPoints = _.map(this.prevClicks, boundedPoint)
+          this.configChannel.perform('update', { new_config: { perspective: boundedPoints } })
+          this.prevClicks.splice(0)
+        }
       }
     },
 
@@ -95,8 +117,16 @@ export default {
   computed: {
     nextClick: function nextClick () {
       if (this.clickMode === 'boundary') {
-        const where = this.prevClick === undefined ? 'top left' : 'bottom right'
+        const where = this.prevClicks.length === 0 ? 'top left' : 'bottom right'
         return `Click ${where}`
+      } else if (this.clickMode === 'perspective') {
+        switch (this.prevClicks.length) {
+          case 0: return 'Click top left'
+          case 1: return 'Click top right'
+          case 2: return 'Click bottom left'
+          default:return 'Click bottom right'
+
+        }
       }
       return 'Click origin'
     },
