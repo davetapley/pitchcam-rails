@@ -83,7 +83,7 @@ class Config
   end
 
   def attributes
-    instance_values.except 'updated_at', 'track'
+    instance_values.except 'updated_at', 'track', 'image_processor'
   end
 
   def color_names
