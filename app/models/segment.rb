@@ -81,7 +81,7 @@ class Segment
     world_scale = world_transform.scale
     x = (x_r * world_scale) + world_origin.x
     y = (y_r * world_scale) + world_origin.y
-    CvPoint.new x, y
+    CvPoint.new x.round, y.round
   end
 
   def render_to(canvas, shapes, color = CvColor::White)

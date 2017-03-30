@@ -30,5 +30,4 @@
 //= require bootstrap/scrollspy
 //= require bootstrap/tab
 //= require bootstrap/transition
-//= require webcamjs
 //= require_tree .
