@@ -14,7 +14,7 @@
         </tr>
         <tr >
           <td>Scale</td>
-          <td><input v-model="world_transform.scale" @change="sendConfig" type="number" min="1" max="100"/></td>
+          <td><input v-model="world_transform.scale" @change="sendConfig" type="number" min="1"/></td>
           <td>Rotation</td>
           <td><input v-model="world_transform.rotation" @change="sendConfig" type="number" min="0" max="360"/></td>
         </tr>
