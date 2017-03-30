@@ -5,6 +5,7 @@ import axios from 'axios'
 import config from 'components/config'
 import debugRenders from 'components/debug_renders'
 import trainingVideo from 'components/training_video'
+import webcamVideo from 'components/webcam_video'
 
 const cable = ActionCable.createConsumer('ws://localhost:28080/cable')
 
@@ -22,7 +23,8 @@ export default function (template) {
     components: {
       config,
       debugRenders,
-      trainingVideo
+      trainingVideo,
+      webcamVideo
     }
   })
 }
