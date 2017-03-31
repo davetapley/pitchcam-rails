@@ -28,7 +28,8 @@ class VideoChannel < ApplicationCable::Channel
     output_uri = "data:image/png;base64,#{output_encoded}"
 
     image_attrs = { uri: output_uri, createdAt: data['created_at'] }
-    DebugRenderChannel.broadcast_to uuid, color: false, image: image_attrs.to_json
+    debug = { expected_car_pixel_count: (config.track.car_radius_world**2 * Math::PI).round }
+    DebugRenderChannel.broadcast_to uuid, color: false, image: image_attrs.to_json, debug: debug.to_json
 
     image_processor = config.image_processor
     dirty_colors = image_processor.handle_image masked_track_image
@@ -45,10 +46,13 @@ class VideoChannel < ApplicationCable::Channel
       output_uri = "data:image/png;base64,#{output_encoded}"
 
       image_attrs = { uri: output_uri, createdAt: data['created_at'] }
-      positions = { world: image_processor.colors_world_positions[color], track: image_processor.colors_track_positions[color] }
-      DebugRenderChannel.broadcast_to uuid, color: true, name: color.name, image: image_attrs.to_json, positions: positions.to_json
-    end
 
+      latest_world_position = image_processor.colors_positions[color].to_point
+      latest_track_position = latest_world_position && config.track.position_from_world(latest_world_position)
+      positions = { world: latest_world_position, track: latest_track_position }
+      debug = image_processor.colors_debug[color]
+      DebugRenderChannel.broadcast_to uuid, color: true, name: color.name, image: image_attrs.to_json, positions: positions.to_json, debug: debug.to_json
+    end
 
     VideoChannel.broadcast_to uuid, action: 'snap'
   end

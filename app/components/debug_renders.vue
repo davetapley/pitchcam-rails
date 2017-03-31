@@ -12,6 +12,10 @@
             <td>Lag: </td>
             <td>{{ track.lag }}ms</td>
           </tr>
+          <tr v-for="(debugValue, debugKey) in track.debug">
+            <td>{{debugKey}}:</td>
+            <td>{{debugValue}}</td>
+          </tr>
         </table>
 
         <img :src="track.image.uri">
@@ -36,6 +40,10 @@
           <tr>
             <td>Track:</td>
             <td>{{ color.positions.track | coords('p', 'd', 2) }}</td>
+          </tr>
+          <tr v-for="(debugValue, debugKey) in color.debug">
+            <td>{{debugKey}}:</td>
+            <td>{{debugValue}}</td>
           </tr>
         </table>
 
@@ -88,6 +96,7 @@ export default {
         if (data.image) {
           const image = JSON.parse(data.image)
           const lag = Date.now() - new Date(image.createdAt)
+          const debug = JSON.parse(data.debug)
 
           if (data.color) {
             const name = data.name
@@ -100,15 +109,17 @@ export default {
             const positions = JSON.parse(data.positions)
 
             if (color === undefined) {
-              that.colors.push({ name, lag, image, positions })
+              that.colors.push({ name, lag, image, positions, debug })
             } else {
               color.lag = lag
               color.image = image
               color.positions = positions
+              color.debug = debug
             }
           } else {
             that.track.lag = lag
             that.track.image = image
+            that.track.debug = debug
           }
         } else if (data.update) {
           that.updates.unshift(data.update)

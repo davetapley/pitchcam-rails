@@ -1,69 +1,120 @@
 class ImageProcessor
+  attr_reader :colors, :car_radius, :car_postion_tolerance,
+    :colors_positions, :colors_debug,
+    :dirty_at, :dirty_colors, :min_time_for_new_position
 
-  attr_reader :track, :colors, :colors_world_positions, :colors_track_positions
-
-  def initialize(track, colors)
-    @track = track
+  def initialize(colors, car_radius_world)
     @colors = colors
+    @car_radius = car_radius_world
+    @car_postion_tolerance = 4
+    @min_time_for_new_position = 2.seconds
 
-    @colors_world_positions = {}
-    @colors_track_positions = {}
+    @colors_positions = Hash.new OffTrack.new
+    @colors_debug = Hash.new { |hash,key| hash[key] = ColorDebug.new }
 
-    @dirty_start = nil
+    @dirty_colors = Set.new
+    @dirty_at = nil
   end
 
   def handle_image(image)
-    @dirty_colors = [] if @dirty_start.nil?
+    colors.each { |color| update_color image, color }
+    new_positions
+  end
 
-    colors.each do |color|
-      hough = color.hsv_map(image).hough_circles CV_HOUGH_GRADIENT, 2, 5, 200, 40
-      hough = hough.to_a.reject { |circle| circle.radius > track.car_radius_world * 1.5 }
+  ColorDebug = Struct.new :pixel_count
 
-      if hough.size > 0
-        circle = hough.first
-        new_world_position = circle.center
-        #puts "#{color.name}\tworld\t#{new_world_position}"
+  module TimeDifferentiatable
+    attr_reader :at
 
-        on_track = track.inside? circle.center
-        if on_track
-          previous_world_position = colors_world_positions[color]
-          new_track_position = track.position_from_world new_world_position
+    def initialize(*args)
+      @at = Time.current
+      super *args
+    end
 
-          if previous_world_position.nil?
-            mark_dirty color, new_world_position, new_track_position
-          else
-            delta_x = (new_world_position.x - previous_world_position.x).abs
-            delta_y = (new_world_position.y - previous_world_position.y).abs
-            delta = Math.sqrt(delta_x + delta_y)
-            mark_dirty color, new_world_position, new_track_position if delta > 4
-          end
-        else
-          previous_track_position = colors_track_positions[color]
-          mark_dirty color, new_world_position, nil unless previous_track_position.nil?
-        end
+    def different_in_time?(other)
+      (at - other.at).abs > 2.seconds
+    end
+  end
+
+  class OnTrack
+    prepend TimeDifferentiatable
+
+    attr_reader :position
+    delegate :x, :y, to: :position
+
+    def initialize(car_postion_tolerance, circle)
+      @car_postion_tolerance = car_postion_tolerance
+      @position = circle.center
+    end
+
+    def different_in_space?(other)
+      case other
+      when OnTrack
+        delta_x = (x - other.x).abs
+        delta_y = (y - other.y).abs
+        delta = Math.sqrt(delta_x + delta_y)
+        delta > @car_postion_tolerance
+      else
+        false
       end
     end
 
-    if @dirty_colors.size > 0
-      @dirty_start ||= Time.now
+    def to_point
+      position
+    end
+  end
 
-      dirty_time = Time.now - @dirty_start
-      if dirty_time > 2.0
-        @dirty_start = nil
-        return @dirty_colors
-      else
-        return []
-      end
-    else
-      return []
+  class OffTrack
+    prepend TimeDifferentiatable
+
+    def different_in_space?(other)
+      !other.is_a?(OffTrack)
+    end
+
+    def to_point
+      nil
     end
   end
 
   private
 
-  def mark_dirty(color, world_position, track_position)
-    colors_world_positions[color] = world_position
-    colors_track_positions[color] = track_position
-    @dirty_colors << [color.name, track_position]
+  def update_color(image, color)
+    map = color.hsv_map image
+
+    colors_debug[color].pixel_count = map.count_non_zero
+
+    dp = 2
+    min_dist = 5
+    p1 = 200
+    p2 = 10
+    r_min = 0
+    r_max = car_radius * 2
+
+    hough = map.hough_circles(CV_HOUGH_GRADIENT, dp, min_dist, p1, p2, r_min, r_max)
+
+    previous_position = colors_positions[color]
+    new_position = hough.empty? ? OffTrack.new : OnTrack.new(car_postion_tolerance, hough.first)
+
+    different_in_time = previous_position.different_in_time? new_position
+    different_in_space = previous_position.different_in_space? new_position
+
+    if different_in_time && different_in_space
+      dirty_colors.add color
+      colors_positions[color] = new_position
+    end
+  end
+
+  def new_positions
+    return [] unless dirty_colors.size > 0
+
+    @dirty_at ||= Time.now
+    return [] unless dirty_at < min_time_for_new_position.ago
+
+    new_positions = colors_positions.slice dirty_colors
+
+    @dirty_at = nil
+    @dirty_colors = Set.new
+
+    return new_positions
   end
 end
