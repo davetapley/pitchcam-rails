@@ -95,6 +95,6 @@ class Config
   end
 
   def image_processor
-    @image_processor ||= ImageProcessor.new track, colors
+    @image_processor ||= ImageProcessor.new colors, track.car_radius_world
   end
 end

@@ -21,6 +21,10 @@ class Color
     instance_values
   end
 
+  def to_s
+    name
+  end
+
   private
 
   def hsv_low_cv_scalar
