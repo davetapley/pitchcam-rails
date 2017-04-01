@@ -27,11 +27,12 @@ class VideoChannel < ApplicationCable::Channel
     output_encoded = Base64.strict_encode64 File.open(tmp_file, 'rb').read
     output_uri = "data:image/png;base64,#{output_encoded}"
 
+    image_processor = config.image_processor
+
     image_attrs = { uri: output_uri, createdAt: data['created_at'] }
-    debug = { car_radius_world: config.track.car_radius_world, expected_car_pixel_count: (config.track.car_radius_world**2 * Math::PI).round }
+    debug = { car_radius_world: config.track.car_radius_world, expected_car_pixel_count: image_processor.expected_pixel_count }
     DebugRenderChannel.broadcast_to uuid, color: false, image: image_attrs.to_json, debug: debug.to_json
 
-    image_processor = config.image_processor
     dirty_colors = image_processor.handle_image masked_track_image
     DebugRenderChannel.broadcast_to uuid, update: dirty_colors if dirty_colors.present?
 

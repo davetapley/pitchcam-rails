@@ -1,11 +1,14 @@
 class ImageProcessor
-  attr_reader :colors, :car_radius, :car_postion_tolerance,
+  attr_reader :colors, :car_radius, :car_postion_tolerance, :expected_pixel_count,
     :colors_positions, :colors_debug,
     :dirty_at, :dirty_colors, :min_time_for_new_position
 
   def initialize(colors, car_radius_world)
     @colors = colors
+
     @car_radius = car_radius_world
+    @expected_pixel_count = (car_radius_world**2 * Math::PI).round
+
     @car_postion_tolerance = 4
     @min_time_for_new_position = 5.seconds
 
@@ -81,7 +84,10 @@ class ImageProcessor
   def update_color(image, color)
     map = color.hsv_map image
 
-    colors_debug[color].pixel_count = map.count_non_zero
+    pixel_count = map.count_non_zero
+    colors_debug[color].pixel_count = pixel_count
+
+    return unless pixel_count.between? (expected_pixel_count * 0.8), (expected_pixel_count * 1.2)
 
     dp = 2
     min_dist = 5
