@@ -7,7 +7,7 @@ class ImageProcessor
     @colors = colors
     @car_radius = car_radius_world
     @car_postion_tolerance = 4
-    @min_time_for_new_position = 2.seconds
+    @min_time_for_new_position = 5.seconds
 
     @colors_positions = Hash.new OffTrack.new
     @colors_debug = Hash.new { |hash,key| hash[key] = ColorDebug.new }
@@ -21,7 +21,7 @@ class ImageProcessor
     new_positions
   end
 
-  ColorDebug = Struct.new :pixel_count
+  ColorDebug = Struct.new :pixel_count, :circle_count
 
   module TimeDifferentiatable
     attr_reader :at
@@ -55,7 +55,7 @@ class ImageProcessor
         delta = Math.sqrt(delta_x + delta_y)
         delta > @car_postion_tolerance
       else
-        false
+        true
       end
     end
 
@@ -91,6 +91,9 @@ class ImageProcessor
     r_max = car_radius * 2
 
     hough = map.hough_circles(CV_HOUGH_GRADIENT, dp, min_dist, p1, p2, r_min, r_max)
+    hough.to_a.sort_by! { |circle| (car_radius - circle.radius).abs }
+
+    colors_debug[color].circle_count = hough.size
 
     previous_position = colors_positions[color]
     new_position = hough.empty? ? OffTrack.new : OnTrack.new(car_postion_tolerance, hough.first)
