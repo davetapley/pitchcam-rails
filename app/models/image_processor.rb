@@ -93,8 +93,8 @@ class ImageProcessor
     min_dist = 5
     p1 = 200
     p2 = 10
-    r_min = 0
-    r_max = car_radius * 2
+    r_min = car_radius * 0.8
+    r_max = car_radius * 1.2
 
     hough = map.hough_circles(CV_HOUGH_GRADIENT, dp, min_dist, p1, p2, r_min, r_max)
     hough.to_a.sort_by! { |circle| (car_radius - circle.radius).abs }
