@@ -42,7 +42,7 @@ class Track
       angle += Math::PI if prev_segment.tile.is_a?(Corner) && prev_segment.mirror_x
       angle = angle % (Math::PI * 2)
 
-      mirror_x =  %w(slw l).include? direction.downcase
+      mirror_x =  %w(t l).include? direction.downcase
       segment = Segment.new index + 1, prev_segment.next_world_origin, angle, mirror_x, world_transform, tile
       segments << segment
     end
@@ -83,7 +83,7 @@ class Track
 
   def tile_for_direction(direction)
     case direction.downcase
-    when 'slw', 'srw'
+    when 's', 't'
       Straight
     when 'l', 'r'
       Corner
