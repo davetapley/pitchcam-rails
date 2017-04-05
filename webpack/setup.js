@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import ActionCable from 'actioncable'
 import axios from 'axios'
+import VueLocalStorage from 'vue-localstorage'
 
 import config from 'components/config'
 import debugRenders from 'components/debug_renders'
@@ -11,6 +12,7 @@ const cable = ActionCable.createConsumer('ws://localhost:28080/cable')
 
 Vue.prototype.$http = axios
 Vue.prototype.$cable = cable
+Vue.use(VueLocalStorage)
 
 export default function (template) {
   return new Vue({

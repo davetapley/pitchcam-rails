@@ -21,22 +21,26 @@ export default {
       clickMode: 'boundary',
       prevClick: undefined,
       boundary: { topLeft: undefined, bottomRight: undefined },
+      filePath: undefined,
       videoChannel: null,
       configChannel: null,
       trainingRenderUri: 'data:image/png;base64,'
     }
+  },
+  localStorage: {
+    boundary: { type: Object }
   },
   methods: {
     onFileChange: function onFileChange (event) {
       const file = event.target.files[0]
       const type = file.type
       const canPlay = this.$refs.video.canPlayType(type) !== 'no'
-      this.message = `Can play type "${type}" ${canPlay}`
 
       if (!canPlay) {
         return
       }
 
+      this.fileName = file.name
       const URL = window.URL || window.webkitURL
       const fileURL = URL.createObjectURL(file)
       const videoElement = this.$refs.video
@@ -48,9 +52,14 @@ export default {
     },
 
     setDefaultTrackBoundary: function setDefaultTrackBoundary () {
-      const videoElement = this.$refs.video
-      this.boundary.topLeft = { x: 0, y: 0 }
-      this.boundary.bottomRight = { x: videoElement.videoWidth, y: videoElement.videoHeight }
+      const prevBoundary = this.$localStorage.get('boundary')
+      if (prevBoundary) {
+        this.boundary = prevBoundary
+      } else {
+        const videoElement = this.$refs.video
+        this.boundary.topLeft = { x: 0, y: 0 }
+        this.boundary.bottomRight = { x: videoElement.videoWidth, y: videoElement.videoHeight }
+      }
     },
 
     click: function click (event) {
@@ -64,6 +73,7 @@ export default {
           this.boundary.topLeft = this.prevClick
           this.boundary.bottomRight = point
           this.prevClick = undefined
+          this.$localStorage.set('boundary', this.boundary)
         }
       } else if (this.clickMode === 'origin') {
         const topLeft = this.boundary.topLeft
