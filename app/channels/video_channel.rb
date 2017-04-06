@@ -18,17 +18,11 @@ class VideoChannel < ApplicationCable::Channel
 
     # Track mask
     masked_track_image = config.track_mask.mask_image image
-
-    tmp_file =  'tmp/output.png'
-    masked_track_image.save_image tmp_file
-    output_encoded = Base64.strict_encode64 File.open(tmp_file, 'rb').read
-    output_uri = "data:image/png;base64,#{output_encoded}"
-
+    masked_track_image_uri = masked_track_image.to_data_uri
+    masked_track_image_attrs = { uri: masked_track_image_uri, createdAt: data['created_at'] }
     car_finder = config.car_finder
-
-    image_attrs = { uri: output_uri, createdAt: data['created_at'] }
     debug = { car_radius_world: config.track.car_radius_world, expected_car_pixel_count: car_finder.expected_pixel_count }
-    DebugRenderChannel.broadcast_to uuid, color: false, image: image_attrs.to_json, debug: debug.to_json
+    DebugRenderChannel.broadcast_to uuid, color: false, image: masked_track_image_attrs.to_json, debug: debug.to_json
 
     dirty_colors = car_finder.handle_image masked_track_image
     DebugRenderChannel.broadcast_to uuid, update: dirty_colors if dirty_colors.present?
@@ -46,16 +40,12 @@ class VideoChannel < ApplicationCable::Channel
         positions[:track] = nil
       end
 
+      masked_color_image_uri = masked_color_image.to_data_uri
+      masked_color_image_attrs = { uri: masked_color_image_uri, createdAt: data['created_at'] }
+
       debug = car_finder.colors_debug[color]
 
-      tmp_file =  'tmp/output.png'
-      masked_color_image.save_image tmp_file
-      output_encoded = Base64.strict_encode64 File.open(tmp_file, 'rb').read
-      output_uri = "data:image/png;base64,#{output_encoded}"
-
-      image_attrs = { uri: output_uri, createdAt: data['created_at'] }
-
-      DebugRenderChannel.broadcast_to uuid, color: true, name: color.name, image: image_attrs.to_json, positions: positions.to_json, debug: debug.to_json
+      DebugRenderChannel.broadcast_to uuid, color: true, name: color.name, image: masked_color_image_attrs.to_json, positions: positions.to_json, debug: debug.to_json
     end
 
     VideoChannel.broadcast_to uuid, action: 'snap'
