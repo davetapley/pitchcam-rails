@@ -64,6 +64,7 @@ class Config
     new_world_transform = hash.delete 'world_transform'
     world_transform.attributes = new_world_transform if new_world_transform.present?
     @track = nil
+    @track_mask = nil
     @car_finder = nil
 
     new_colors = hash.delete 'colors'
@@ -83,7 +84,7 @@ class Config
   end
 
   def attributes
-    instance_values.except 'updated_at', 'track', 'car_finder'
+    instance_values.except 'updated_at', 'track', 'track_mask', 'car_finder'
   end
 
   def color_names
@@ -92,6 +93,10 @@ class Config
 
   def track
     @track ||= Track.new world_transform, layout.split(' ')
+  end
+
+  def track_mask
+    @track_mask ||= TrackMask.new track
   end
 
   def car_finder

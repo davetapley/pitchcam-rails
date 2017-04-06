@@ -56,10 +56,6 @@ class Track
     segments.each { |segment| segment.render_outline_to canvas, color }
   end
 
-  def render_mask_to(mask)
-    segments.each { |segment| segment.render_mask_to mask }
-  end
-
   def render_progress_to(canvas, color, position)
     segment = segments[position.segment_index]
     segment.render_progress_to canvas, color, position.to_local

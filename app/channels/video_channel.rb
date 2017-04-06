@@ -17,10 +17,7 @@ class VideoChannel < ApplicationCable::Channel
     config = Configs.instance.get uuid
 
     # Track mask
-    track_mask = CvMat.new image.size.height, image.size.width, :cv8uc1, 1
-    track_mask.set_zero!
-    config.track.render_mask_to track_mask
-    masked_track_image = image.clone.set CvColor::White, track_mask.not
+    masked_track_image = config.track_mask.mask_image image
 
     tmp_file =  'tmp/output.png'
     masked_track_image.save_image tmp_file
