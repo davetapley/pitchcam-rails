@@ -18,4 +18,9 @@ class ConfigChannel < ApplicationCable::Channel
     config = Configs.instance.get uuid
     config.to_disk
   end
+
+  def set_null_mask(data)
+    config = Configs.instance.get uuid
+    config.null_image = IplImage.load_from_data_uri data['image_uri']
+  end
 end

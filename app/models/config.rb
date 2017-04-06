@@ -24,7 +24,7 @@ end
 class Config
   include ActiveModel::Serializers::JSON
 
-  attr_accessor :layout
+  attr_accessor :layout, :null_image
   attr_reader :updated_at, :world_transform, :colors, :color_window_on
 
   def self.from_disk

@@ -5,6 +5,7 @@
     <label for="boundary">Set boundary</label>
     <input type="radio" id="origin" value="origin" v-model="clickMode" @change="resetClickMode">
     <label for="origin">Set origin</label>
+    <button @click="setNullMask">Set null mask</button>
     <p>{{nextClick}}</p>
     <p>{{boundaryStatus}}</p>
     <video id="training-video" controls loop muted ref="video" @loadedmetadata="setDefaultTrackBoundary" @click="click" @play="snap"></video>
@@ -99,6 +100,26 @@ export default {
         const imageUri = canvas.toDataURL('img/jpeg')
         const createdAt = Date.now()
         this.videoChannel.perform('frame', { image_uri: imageUri, created_at: createdAt })
+      }
+    },
+
+    setNullMask: function setNullMask () {
+      const videoElement = this.$refs.video
+      if (videoElement && videoElement.readyState > 0) {
+        const width = this.boundary.bottomRight.x - this.boundary.topLeft.x
+        const height = this.boundary.bottomRight.y - this.boundary.topLeft.y
+
+        const canvas = document.createElement('CANVAS')
+        canvas.width = width
+        canvas.height = height
+
+        const srcX = this.boundary.topLeft.x
+        const srcY = this.boundary.topLeft.y
+        canvas.getContext('2d').drawImage(videoElement, srcX, srcY, width, height, 0, 0, width, height)
+
+        const imageUri = canvas.toDataURL('img/jpeg')
+        const createdAt = Date.now()
+        this.configChannel.perform('set_null_mask', { image_uri: imageUri, created_at: createdAt })
       }
     }
   },

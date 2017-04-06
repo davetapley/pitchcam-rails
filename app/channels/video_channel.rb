@@ -15,6 +15,11 @@ class VideoChannel < ApplicationCable::Channel
 
     # Track mask
     masked_track_image = config.track_mask.mask_image image
+
+    if config.null_image
+      masked_track_image = masked_track_image.sub config.null_image, config.track_mask.mask(image).not
+    end
+
     masked_track_image_uri = masked_track_image.to_data_uri
     masked_track_image_attrs = { uri: masked_track_image_uri, createdAt: data['created_at'] }
     car_finder = config.car_finder
