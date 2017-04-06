@@ -1,4 +1,4 @@
-class ImageProcessor
+class CarFinder
   attr_reader :colors, :car_radius, :car_postion_tolerance, :expected_pixel_count,
     :colors_positions, :colors_debug,
     :dirty_at, :dirty_colors, :min_time_for_new_position
