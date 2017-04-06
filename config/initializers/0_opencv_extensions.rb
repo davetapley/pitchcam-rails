@@ -24,3 +24,13 @@ module CvMatExtensions
 end
 
 CvMat.prepend CvMatExtensions
+
+module IplImageExtensions
+  def load_from_data_uri(uri)
+    uri = URI::Data.new uri
+    File.open('tmp/image.jpg', 'wb') { |f| f.write(uri.data) }
+    image = IplImage.load 'tmp/image.jpg'
+  end
+end
+
+IplImage.extend IplImageExtensions
