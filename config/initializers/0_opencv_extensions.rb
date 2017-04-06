@@ -28,8 +28,15 @@ CvMat.prepend CvMatExtensions
 module IplImageExtensions
   def load_from_data_uri(uri)
     uri = URI::Data.new uri
-    File.open('tmp/image.jpg', 'wb') { |f| f.write(uri.data) }
-    image = IplImage.load 'tmp/image.jpg'
+    file = Tempfile.new 'image.jpg'
+    begin
+      file.binmode
+      file.write uri.data
+      IplImage.load file.path
+    ensure
+      file.close
+      file.unlink
+    end
   end
 end
 
