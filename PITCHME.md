@@ -8,7 +8,7 @@ Augmented reality board games.
 
 Disclaimer:
 
-This talk is full of _terrible things_.
+Just because you can...
 
 +++
 
@@ -16,9 +16,7 @@ But it's been a lot of fun.
 
 ---
 
-# PitchCar
-
-_Photo of box_
+![](pitchme/box.jpg)
 
 +++
 
@@ -28,14 +26,16 @@ _Show people playing via camera_
 
 +++
 
-#### Building the track
+#### The track
 
-* n straights
-* m corners
+* Six straights
+* Ten corners
 
 +++
 
-Trivia: There are z combinations, h/t @jonah
+Trivia:
+
+* 630 combinations
 
 +++
 
@@ -46,109 +46,66 @@ Trivia: There are z combinations, h/t @jonah
 
 +++
 
-#### There *aren't* walls
+### Leaving the track
 
-aka: cars can and will  _leave the track_
+It happens
 
-_Show people flicking themselves and/or others off the track_
+Go back to where you were before
 
-+++
-
-|                     | Your car | Other cars |
-|---------------------|----------|------------|
-| The good            | Stays on | Stay on    |
-| The bad             | Goes off | Stay on   |
-| The ugly            | Goes off | Go off   |
-| The just plain rude | Stays on | Go off   |
-
-+++
-
-### The good
-
-You’re done, well done, next player.
-
-+++
-
-### The bad and ugly
-
-All the cars which left the track go back.
-
-+++
-
-### The rude
-
-You go back as well.
-
-+++
-
-*Go back*
+_Demo_
 
 +++
 
 * Remembering is hard
 * Especially impartial remembering
 
-_Let's have computers do it_
-
 +++
 
-### Some rules
-
-1. No hardware mods
-1. Be as noninvasive as possible
+_Let's have computers do it_
 
 ---
 
 #### The goal
 
-After each player's turn, either:
-
-* Tell the next player they can go, or:
-* Show which cars need to be put back.
+* Capture webcam images
+* Show the positions
 
 +++
 
-### What do we need
+#### Capturing webcam images
 
-* Video acquisition and rendering
-* Image processing
-* Real time communication
-
-+++
-
-#### Video acquisition and rendering
-
-> This article shows how to use WebRTC to access the camera on a computer or mobile phone with WebRTC support and take a photo with it.
+![](pitchme/web_rtc.png)
 
 https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Taking_still_photos
 
 +++
 
-> Now let's take a look at the JavaScript code.
-
-https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Taking_still_photos
-
-Why not try Vue.js?
+![](pitchme/web_rtc_js.png)
 
 +++
 
-#### Image processing
+Let's try **Vue.js**.
 
-Going to cheat and use **OpenCV**
++++
+
+#### Processing images
+
+In Ruby?
+
++++
+
+Use **OpenCV**
+
 * C/C++ image processing library
-* BSD license
-* 16 years old
 
-* Ruby wrapper:
+* Hash a Ruby wrapper:
   https://github.com/ruby-opencv
 
 +++
 
-# Be real time
+#### Be real time
 
-> WebSocket protocol enables interaction between a browser and a web server with lower overheads, facilitating real-time data transfer from and to the server.
-
-Did someone say **ACTION CABLE**?
+Did someone say **ActionCable**?
 
 +++
 
@@ -156,46 +113,49 @@ Did someone say **ACTION CABLE**?
 
 |                                      |              |
 |--------------------------------------|--------------|
-| Video acquisition and rendering      | Vue.js       |
-| Image processing                     | OpenCV       |
-| Real time asynchronous communication | Action Cable |
+| Video acquisition and rendering      | WebRTC & Vue.js       |
+| Image processing                     | OpenCV via Ruby binding      |
+| Real time asynchronous communication | ActionCable |
 
 ---
 
 #### The plan
 
-1. Get images from a webcam
-1. Send it over a websocket
-1. Load it in to OpenCV
-1. Figure out when cars have moved
-1. Display whose turn it is
+1. Get an image
+1. ActionCable to server
+1. Process image
+1. Who moved?
+1. Results
 
 +++
 
-#### Get images from a webcam
+#### Get an image
 
-##### vue-webcam
-
-> A Vue component for capturing image from webcam.
+![](pitchme/vue_webcam_google.png)
 
 https://github.com/smronju/vue-webcam
 
 +++
 
+HTML
+
+
 ```html
-<vue-webcam ref='webcam'></vue-webcam>
-<img :src="photo">
-<button type="button" @click="take_photo">Take Photo</button>
+ <vue-webcam ref='webcam'></vue-webcam>
+ <button type="button" @click="take_photo">Take Photo</button>
+ <img :src="photo">
 ```
 
 +++
 
+JS
+
 ```javascript
-    methods: {
-        take_photo () {
-            this.photo = this.$refs.webcam.getPhoto();
-        }
-    }
+methods: {
+  take_photo () {
+    this.photo = this.$refs.webcam.getPhoto();
+  }
+}
 ```
 
 What is `this.photo`?
@@ -204,80 +164,144 @@ What is `this.photo`?
 
 #### Data URIs
 
->  URLs prefixed with the data: scheme, allow content creators to embed small files inline in documents.
+![](pitchme/data_uri_mdn.png)
 
 https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs
 
 +++
 
-![](http://rubyonrails.org/images/imagine.png)
+![](pitchme/imagine.png)
+
+http://rubyonrails.org/images/imagine.png
 
 +++
 
----?gist=b716ae62881ba7f058fba393932d69ba
+![](pitchme/uri_generator.png)
+
+https://dopiaza.org/tools/datauri/index.php
+
++++
+
+![](pitchme/imagine_uri.png)
 
 +++
 
 ```html
-<img src="data:image/png;base64,iVBORw0K...">
+<img src=
+  "data:image/png;base64,iVBORw0K...">
 ```
+
+It does actually work!
 
 ---
 
-1. ~~Get images from a webcam~~
-1. Send it over a websocket
-1. Load it in to OpenCV
-1. Figure out when cars have moved
-1. Display whose turn it is
+1. ~~Get an image~~ &#10004;
+1. ActionCable to server
+1. Process image
+1. Who moved?
+1. Results
 
 +++
 
-#### Send it over a websocket
+Get a **Vue.js** component working with **ActionCable**
 
-#### ActionCable
-
-_Show https://github.com/rlafranchi/pong_ repo
-
-> demonstrate JavaScript framework Vue.js and Rails ActionCable
+![](pitchme/pong_repo.png)
 
 +++
 
-Spolier: Suprisingly easy
+#### ActionCable and Vue.js
 
-1. Reference ActionCable within Vue
+1. Get ActionCable JS in Vue
 2. Subscribe to a channel
-4. Receive data from that channel (to a Vue component)
-3. Send data to that channel (from a Vue component)
+3. Send image as data URI
 
 +++
 
-#### Reference ActionCable in Vue
+1: Get ActionCable JS in Vue.js
+
 ```javascript
 import ActionCable from 'actioncable'
-const cable = ActionCable.createConsumer('wss://' + process.env.RAILS_URL.replace(/.*?:\/\//g, '') + '/cable')
+
+const cable = ActionCable.createConsumer('wss://' +
+  process.env.RAILS_URL.replace(/.*?:\/\//g, '') +
+  '/cable')
+
 Vue.prototype.$cable = cable
 ```
 
 +++
-#### Subscribe to a channel
+2: Subscribe to a channel
 ```javascript
-  created () {
-    var that = this
-    this.pongChannel = this.$cable.subscriptions.create({ channel: 'PongChannel', game_id: this.game.id }, {
+created () {
+  this.videoChannel = this.$cable.subscriptions.create(
+    { channel: 'VideoChannel' }, ...
 ```
 
 +++
-#### Receive data from that channel (to a Vue component)
+
+3: Send image
 ```javascript
- received (data) {
-        that.y = data.y
-        that.x = data.x
-      }
+   this.videoChannel.send({ image: uriEncodedImage })
+```
+```ruby
+class VideoChannel < ApplicationCable::Channel
+  def receive(data)
+    uri_encoded_image = data['image']
+  end
+end
 ```
 
 +++
-#### Send data to that channel (from a Vue component)
-```javascript
-   this.paddleChannel.send({y: this.currentPaddle().y})
+
+#### This is very cool
+
 ```
++-----------------------+
+|                       |
+|   +--------------+    |  action   +----------+
+|   |              |    |  cable    |          |
+|   |  <element>   | +------------> |  Rails   |
+|   |              |    |           |          |
+|   |  </element>  | <------------+ |  server  |
+|   |              |    |           |          |
+|   +--------------+    |           +----------+
+|                       |
++-----------------------+
+
+```
+
 +++
+
+#### Wiring it up
+
+```javascript
+methods: {
+  take_photo () {
+    this.photo = this.$refs.webcam.getPhoto()
+    this.videoChannel.send({image: this.photo})
+  }
+}
+```
+
++++
+
+#### Did it work?
+
+Yes, but...
+
++++
+
+![](pitchme/actioncable_log.gif)
+
+
+---
+
+1. ~~Get an image~~ &#10004;
+1. ~~ActionCable to server~~ &#10004;
+1. Process image
+1. Who moved?
+1. Results
+
++++
+
+#### Load it in to OpenCV
