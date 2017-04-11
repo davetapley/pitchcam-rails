@@ -305,3 +305,51 @@ Yes, but...
 +++
 
 #### Load it in to OpenCV
+
++++
+
+![](pitchme/open_cv_ipl_image.png)
+
++++
+
+![](pitchme/open_cv_ipl_image_load.png)
+
++++
+
+![](pitchme/data_uri_data.png)
+
++++
+
+![](pitchme/ruby_data_uri_google.png)
+
++++
+
+![](pitchme/ruby_data_uri_regex.png)
+
+
+https://github.com/dball/data_uri/blob/master/lib/data_uri/uri.rb
+
++++
+
+```ruby
+class VideoChannel < ApplicationCable::Channel
+
+  def receive(data)
+    uri = URI::Data.new data['image_uri']
+    File.open('tmp/image.jpg', 'wb') { |f| f.write(uri.data) }
+    image = IplImage.load 'tmp/image.jpg'
+```
+
++++
+
+![](pitchme/matrix_definition.png)
+
++++
+
+![](pitchme/open_cv_ipl_cv_mat.png)
+
++++
+
+![](pitchme/pixel_spreadsheet_1.png)
+
+http://www.think-maths.co.uk/spreadsheet
