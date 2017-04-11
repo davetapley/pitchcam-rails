@@ -5,7 +5,8 @@
     <label for="boundary">Set boundary</label>
     <input type="radio" id="origin" value="origin" v-model="clickMode" @change="resetClickMode">
     <label for="origin">Set origin</label>
-    <button @click="setNullMask">Set null mask</button>
+    <br>
+    <button @click="setCapturingNullImage">{{capturingNullImageStatus}}</button>
     <p>{{nextClick}}</p>
     <p>{{boundaryStatus}}</p>
     <video id="training-video" controls loop muted ref="video" @loadedmetadata="setDefaultTrackBoundary" @click="click" @play="snap"></video>
@@ -25,7 +26,8 @@ export default {
       filePath: undefined,
       videoChannel: null,
       configChannel: null,
-      trainingRenderUri: 'data:image/png;base64,'
+      trainingRenderUri: 'data:image/png;base64,',
+      capturingNullImage: false
     }
   },
   localStorage: {
@@ -103,24 +105,9 @@ export default {
       }
     },
 
-    setNullMask: function setNullMask () {
-      const videoElement = this.$refs.video
-      if (videoElement && videoElement.readyState > 0) {
-        const width = this.boundary.bottomRight.x - this.boundary.topLeft.x
-        const height = this.boundary.bottomRight.y - this.boundary.topLeft.y
-
-        const canvas = document.createElement('CANVAS')
-        canvas.width = width
-        canvas.height = height
-
-        const srcX = this.boundary.topLeft.x
-        const srcY = this.boundary.topLeft.y
-        canvas.getContext('2d').drawImage(videoElement, srcX, srcY, width, height, 0, 0, width, height)
-
-        const imageUri = canvas.toDataURL('img/jpeg')
-        const createdAt = Date.now()
-        this.configChannel.perform('set_null_mask', { image_uri: imageUri, created_at: createdAt })
-      }
+    setCapturingNullImage: function setCapturingNullImage () {
+      this.capturingNullImage = !this.capturingNullImage
+      this.configChannel.perform('capturing_null_image', { enabled: this.capturingNullImage })
     }
   },
   computed: {
@@ -138,6 +125,9 @@ export default {
       }
 
       return `Boundary from ${this.boundary.topLeft.x}, ${this.boundary.topLeft.y} to ${this.boundary.bottomRight.x}, ${this.boundary.bottomRight.y}`
+    },
+    capturingNullImageStatus: function capturingNullImageStatus () {
+      return `${this.capturingNullImage ? 'Stop' : 'Start'} null image capture`
     }
   },
   created: function created () {

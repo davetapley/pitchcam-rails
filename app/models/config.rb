@@ -24,8 +24,8 @@ end
 class Config
   include ActiveModel::Serializers::JSON
 
-  attr_accessor :layout, :null_image
-  attr_reader :updated_at, :world_transform, :colors, :color_window_on
+  attr_accessor :layout
+  attr_reader :updated_at, :world_transform, :colors, :color_window_on, :video_mode, :null_image
 
   def self.from_disk
     Config.new.tap do |new_config|
@@ -101,5 +101,14 @@ class Config
 
   def car_finder
     @car_finder ||= CarFinder.new colors, track.car_radius_world
+  end
+
+  def start_null_image_capture
+    @null_image = SmoothedImage.new
+    @video_mode = :capturing_null_image
+  end
+
+  def end_null_image_capture
+    @video_mode = nil
   end
 end

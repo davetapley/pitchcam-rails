@@ -66,7 +66,7 @@ export default {
   data () {
     return {
       channel: null,
-      track: {},
+      track: { lag: undefined, image: undefined, debug: undefined },
       colors: [],
       updates: []
     }

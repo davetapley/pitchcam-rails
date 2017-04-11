@@ -19,8 +19,9 @@ class ConfigChannel < ApplicationCable::Channel
     config.to_disk
   end
 
-  def set_null_mask(data)
+  def capturing_null_image(data)
+    enabled = data['enabled']
     config = Configs.instance.get uuid
-    config.null_image = IplImage.load_from_data_uri data['image_uri']
+    enabled ? config.start_null_image_capture : config.end_null_image_capture
   end
 end
