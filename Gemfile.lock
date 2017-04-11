@@ -124,7 +124,7 @@ GEM
     rb-fsevent (0.9.8)
     rb-inotify (0.9.7)
       ffi (>= 0.5.0)
-    redis (3.3.2)
+    redis (3.3.3)
     redis-actionpack (5.0.1)
       actionpack (>= 4.0, < 6)
       redis-rack (>= 1, < 3)
@@ -208,6 +208,7 @@ DEPENDENCIES
   rack-mini-profiler (~> 0.10)
   rack-timeout (~> 0.4)
   rails (~> 5.0.1)
+  redis (~> 3.3.3)
   redis-rails (~> 5.0.0.pre)
   ruby-opencv
   sass-rails (~> 5.0)

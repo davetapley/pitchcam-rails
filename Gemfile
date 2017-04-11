@@ -17,6 +17,8 @@ gem 'jbuilder', '~> 2.5'
 # Use PostgreSQL as the database for Active Record
 gem 'pg', '~> 0.18'
 
+gem 'redis', '~> 3.3.3'
+
 # Use Redis Rails to set up a Redis backed Cache and / or Session
 gem 'redis-rails', '~> 5.0.0.pre'
 
