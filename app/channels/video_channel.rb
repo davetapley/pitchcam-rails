@@ -55,9 +55,7 @@ class VideoChannel < ApplicationCable::Channel
     debug = { car_radius_world: config.track.car_radius_world, expected_car_pixel_count: car_finder.expected_pixel_count }
     DebugRenderChannel.broadcast_to uuid, color: false, image: masked_track_image_attrs.to_json, debug: debug.to_json
 
-    return
-    dirty_colors = car_finder.handle_image masked_track_image
-    DebugRenderChannel.broadcast_to uuid, update: dirty_colors if dirty_colors.present?
+    # dirty_colors = car_finder.handle_image masked_track_image
 
     config.colors.each do |color|
       color_mask = color.hsv_map masked_track_image
