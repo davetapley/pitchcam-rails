@@ -22,7 +22,7 @@ class SmoothedImage
   end
 
   def delete_from(other)
-    diff = image.BGR2HSV.abs_diff other.BGR2HSV
+    diff = image.abs_diff other
 
     low = @threshold
 
