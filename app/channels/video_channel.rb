@@ -42,7 +42,7 @@ class VideoChannel < ApplicationCable::Channel
     null_image_uri = null_image.to_data_uri
     null_image_attrs = { uri: null_image_uri, createdAt: created_at }
     debug = { frame_count: config.null_image.frame_count }
-    DebugRenderChannel.broadcast_to uuid, color: false, image: null_image_attrs.to_json, debug: debug.to_json
+    DebugRenderChannel.broadcast_to uuid, id: :null_image, image: null_image_attrs.to_json, debug: debug.to_json
   end
 
   def race_frame(config, image, created_at)
@@ -53,7 +53,7 @@ class VideoChannel < ApplicationCable::Channel
     masked_track_image_attrs = { uri: masked_track_image_uri, createdAt: created_at }
     car_finder = config.car_finder
     debug = { car_radius_world: config.track.car_radius_world, expected_car_pixel_count: car_finder.expected_pixel_count }
-    DebugRenderChannel.broadcast_to uuid, color: false, image: masked_track_image_attrs.to_json, debug: debug.to_json
+    DebugRenderChannel.broadcast_to uuid, id: :masked_track_image, image: masked_track_image_attrs.to_json, debug: debug.to_json
 
     # dirty_colors = car_finder.handle_image masked_track_image
 
@@ -75,7 +75,7 @@ class VideoChannel < ApplicationCable::Channel
 
       debug = car_finder.colors_debug[color]
 
-      DebugRenderChannel.broadcast_to uuid, color: true, name: color.name, image: masked_color_image_attrs.to_json, positions: positions.to_json, debug: debug.to_json
+      DebugRenderChannel.broadcast_to uuid, id: color.name, image: masked_color_image_attrs.to_json, debug: debug.to_json
     end
   end
 end

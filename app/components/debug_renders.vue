@@ -1,48 +1,22 @@
 <template>
   <div class="container">
-    <div class="row" v-if="track.image">
-      <h2>Track</h2>
+    <div class="col-xs-6" v-for="render in renders">
+      <h2>{{ render.id }}</h2>
       <table>
         <tr>
           <td>At:</td>
-          <td>{{ track.image.createdAt | seconds }}</td>
+          <td>{{ render.image.createdAt | seconds }}</td>
         </tr>
         <tr>
           <td>Lag: </td>
-          <td>{{ track.lag }}ms</td>
+          <td>{{ render.lag }}ms</td>
         </tr>
-        <tr v-for="(debugValue, debugKey) in track.debug">
+        <tr v-for="(debugValue, debugKey) in render.debug">
           <td>{{debugKey}}:</td>
           <td>{{debugValue}}</td>
         </tr>
       </table>
-        <img :src="track.image.uri">
-    </div>
-    <div class="row" v-for="color in colors">
-      <h2>{{ color.name }}</h2>
-      <table>
-        <tr>
-          <td>At:</td>
-          <td>{{ color.image.createdAt | seconds }}</td>
-        </tr>
-        <tr>
-          <td>Lag: </td>
-          <td>{{ color.lag }}ms</td>
-        </tr>
-        <tr>
-          <td>World:</td>
-          <td>{{ color.positions.world | coords('x', 'y', 0) }}</td>
-        </tr>
-        <tr>
-          <td>Track:</td>
-          <td>{{ color.positions.track | coords('p', 'd', 2) }}</td>
-        </tr>
-        <tr v-for="(debugValue, debugKey) in color.debug">
-          <td>{{debugKey}}:</td>
-          <td>{{debugValue}}</td>
-        </tr>
-      </table>
-      <img :src="color.image.uri">
+      <img :src="render.image.uri">
     </div>
   </div>
 </template>
@@ -57,8 +31,7 @@ export default {
   data () {
     return {
       channel: null,
-      track: { lag: undefined, image: undefined, debug: undefined },
-      colors: []
+      renders: []
     }
   },
   filters: {
@@ -78,34 +51,22 @@ export default {
     const that = this
     this.channel = this.$cable.subscriptions.create({ channel: 'DebugRenderChannel' }, {
       received (data) {
-        if (data.image) {
-          const image = JSON.parse(data.image)
-          const lag = Date.now() - new Date(image.createdAt)
-          const debug = JSON.parse(data.debug)
+        const id = data.id
+        const image = JSON.parse(data.image)
+        const lag = Date.now() - new Date(image.createdAt)
+        const debug = JSON.parse(data.debug)
 
-          if (data.color) {
-            const name = data.name
+        const render = that.renders.find((r) => {
+          const match = r.id === id
+          return match
+        })
 
-            const color = that.colors.find((c) => {
-              const match = c.name === name
-              return match
-            })
-
-            const positions = JSON.parse(data.positions)
-
-            if (color === undefined) {
-              that.colors.push({ name, lag, image, positions, debug })
-            } else {
-              color.lag = lag
-              color.image = image
-              color.positions = positions
-              color.debug = debug
-            }
-          } else {
-            that.track.lag = lag
-            that.track.image = image
-            that.track.debug = debug
-          }
+        if (render === undefined) {
+          that.renders.push({ id, lag, image, debug })
+        } else {
+          render.image = image
+          render.lag = lag
+          render.debug = debug
         }
       }
     })
