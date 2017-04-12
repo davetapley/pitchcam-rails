@@ -25,6 +25,14 @@ end
 
 CvMat.prepend CvMatExtensions
 
+module CvScalarExtensions
+  def inspect
+    (0..3).map { |i| self[i] }
+  end
+end
+
+CvScalar.prepend CvScalarExtensions
+
 module IplImageExtensions
   def load_from_data_uri(uri)
     uri = URI::Data.new uri

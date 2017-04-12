@@ -19,6 +19,14 @@
           <td><input v-model="world_transform.rotation" @change="sendConfig" type="number" min="0" max="360"/></td>
         </tr>
         <tr >
+          <td>Null image threshold</td>
+          <table>
+            <tr v-for="key in hsv">
+              <td>{{ key }}</td>
+              <td><input v-model="null_image_threshold[key]" @change="sendConfig" type="number" min="0" max="255"/></td>
+            </tr>
+          </table>
+        <tr >
         </tr>
       </table>
     </div>
@@ -50,6 +58,7 @@ export default {
     return {
       channel: null,
       world_transform: { origin_x: 0, origin_y: 0 },
+      null_image_threshold: { hue: 10, saturation: 10, value: 10 },
       layout: '',
       colors: []
     }
@@ -64,7 +73,7 @@ export default {
   },
   methods: {
     sendConfig: function sendConfig () {
-      this.channel.perform('update', { new_config: { layout: this.layout, world_transform: this.world_transform, colors: this.colors } })
+      this.channel.perform('update', { new_config: { layout: this.layout, world_transform: this.world_transform, null_image_threshold: this.null_image_threshold, colors: this.colors } })
     },
     saveConfig: function sendConfig () {
       this.channel.perform('save')

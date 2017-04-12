@@ -46,8 +46,8 @@ class VideoChannel < ApplicationCable::Channel
   end
 
   def race_frame(config, image, created_at)
-    image  = config.null_image.abs_diff image if config.null_image
-    masked_track_image = config.track_mask.mask_image image
+    masked_track_image = image #config.track_mask.mask_image image
+    masked_track_image = config.null_image.delete_from image if config.null_image
 
     masked_track_image_uri = masked_track_image.to_data_uri
     masked_track_image_attrs = { uri: masked_track_image_uri, createdAt: created_at }
@@ -55,9 +55,9 @@ class VideoChannel < ApplicationCable::Channel
     debug = { car_radius_world: config.track.car_radius_world, expected_car_pixel_count: car_finder.expected_pixel_count }
     DebugRenderChannel.broadcast_to uuid, color: false, image: masked_track_image_attrs.to_json, debug: debug.to_json
 
+    return
     dirty_colors = car_finder.handle_image masked_track_image
     DebugRenderChannel.broadcast_to uuid, update: dirty_colors if dirty_colors.present?
-    return
 
     config.colors.each do |color|
       color_mask = color.hsv_map masked_track_image

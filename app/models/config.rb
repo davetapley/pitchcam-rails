@@ -76,6 +76,11 @@ class Config
       end
     end
 
+    null_image_threshold = hash.delete 'null_image_threshold'
+    if null_image_threshold && null_image
+      null_image.set_threshold  null_image_threshold['hue'], null_image_threshold['saturation'], null_image_threshold['value']
+    end
+
     hash.each do |key, value|
       send("#{key}=", value)
     end
@@ -84,7 +89,7 @@ class Config
   end
 
   def attributes
-    instance_values.except 'updated_at', 'track', 'track_mask', 'car_finder'
+    instance_values.except 'updated_at', 'track', 'track_mask', 'car_finder', 'null_image'
   end
 
   def color_names
