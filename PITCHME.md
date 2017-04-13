@@ -98,7 +98,7 @@ Use **OpenCV**
 
 * C/C++ image processing library
 
-* Hash a Ruby wrapper:
+* Has a Ruby wrapper:
   https://github.com/ruby-opencv
 
 +++
@@ -123,7 +123,7 @@ Did someone say **ActionCable**?
 
 1. Get an image
 1. ActionCable to server
-1. Process image
+1. Find cars
 1. Who moved?
 1. Results
 
@@ -197,7 +197,7 @@ It does actually work!
 
 1. ~~Get an image~~ &#10004;
 1. ActionCable to server
-1. Process image
+1. Find cars
 1. Who moved?
 1. Results
 
@@ -298,7 +298,7 @@ Yes, but...
 
 1. ~~Get an image~~ &#10004;
 1. ~~ActionCable to server~~ &#10004;
-1. Process image
+1. Find cars
 1. Who moved?
 1. Results
 
@@ -342,6 +342,10 @@ class VideoChannel < ApplicationCable::Channel
 
 +++
 
+![](pitchme/find_blue_on_track_arrow.png)
+
++++
+
 ![](pitchme/matrix_definition.png)
 
 +++
@@ -353,3 +357,54 @@ class VideoChannel < ApplicationCable::Channel
 ![](pitchme/pixel_spreadsheet_1.png)
 
 http://www.think-maths.co.uk/spreadsheet
+
++++
+
+![](pitchme/find_blue_on_track_arrow.png)
+
++++
+
+![](pitchme/color_wheel_arrow_blue.png)
+
+ <pre>#0080FF</pre>
+
++++
+
+![](pitchme/cv_mat_eq.png)
+
+```ruby
+blue = CvScalar.new 0x00, 0x80, 0xFF
+mask = image.eq blue
+```
+
++++
+
+```ruby
+mask.save_image 'tmp/output.png'
+data = File.open('tmp/output.png', 'rb').read
+base64 = Base64.strict_encode64 data
+uri = "data:image/png;base64,#{base64}"
+```
+
++++
+
+![](pitchme/find_blue_mask.png)
+
++++
+
+![](pitchme/color_wheel_circle_blue.png)
+
++++
+
+![](pitchme/cv_mat_in_range.png)
+
++++
+
+Photons be everywhere
+Pixels be noisy
+
+_gif of abs diff_
+
++++
+
+Let's be lazy
