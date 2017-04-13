@@ -20,7 +20,7 @@ class VideoChannel < ApplicationCable::Channel
     config.track.render_outline_to outline_image, CvColor::Green
     DebugRenderChannel.broadcast_to uuid, id: :outline, at: created_at, uri: outline_image.to_data_uri
 
-    masked_image = config.track_mask.mask_image image
+    masked_image = image #config.track_mask.mask_image image
     DebugRenderChannel.broadcast_to uuid, id: :masked, at: created_at, uri: masked_image.to_data_uri
 
     case config.video_mode
@@ -73,6 +73,7 @@ class VideoChannel < ApplicationCable::Channel
 
     config.colors.each do |color|
       color_mask = color.hsv_map cleaned_image
+      DebugRenderChannel.broadcast_to uuid, id: "#{ color.name }_mask", at: created_at, uri: color_mask.to_data_uri
       cleaned_color_image = image.clone.set CvColor::White, color_mask.not
 
       positions = { world: car_finder.colors_positions[color].to_point }
