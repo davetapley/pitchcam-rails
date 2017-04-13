@@ -4,10 +4,6 @@
       <h2>{{ render.id }}</h2>
       <table>
         <tr>
-          <td>At:</td>
-          <td>{{ render.image.createdAt | seconds }}</td>
-        </tr>
-        <tr>
           <td>Lag: </td>
           <td>{{ render.lag }}ms</td>
         </tr>
@@ -16,7 +12,7 @@
           <td>{{debugValue}}</td>
         </tr>
       </table>
-      <img :src="render.image.uri">
+      <img :src="render.uri">
     </div>
   </div>
 </template>
@@ -25,7 +21,6 @@
 </style>
 
 <script>
-import _ from 'lodash'
 
 export default {
   data () {
@@ -34,27 +29,14 @@ export default {
       renders: []
     }
   },
-  filters: {
-    seconds: function time (ms) {
-      const date = new Date(ms)
-      return `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
-    },
-    coords: function coords (obj, axis1, axis2, round) {
-      if (obj === null) {
-        return 'none'
-      }
-
-      return `(${_.round(obj[axis1], round)}, ${_.round(obj[axis2], round)})`
-    }
-  },
   created: function created () {
     const that = this
     this.channel = this.$cable.subscriptions.create({ channel: 'DebugRenderChannel' }, {
       received (data) {
         const id = data.id
-        const image = JSON.parse(data.image)
-        const lag = Date.now() - new Date(image.createdAt)
-        const debug = JSON.parse(data.debug)
+        const uri = data.uri
+        const lag = Date.now() - new Date(data.at)
+        const debug = JSON.parse(data.debug || '{}')
 
         const render = that.renders.find((r) => {
           const match = r.id === id
@@ -62,10 +44,10 @@ export default {
         })
 
         if (render === undefined) {
-          that.renders.push({ id, lag, image, debug })
+          that.renders.push({ id, lag, uri, debug })
         } else {
-          render.image = image
           render.lag = lag
+          render.uri = uri
           render.debug = debug
         }
       }

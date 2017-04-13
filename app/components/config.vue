@@ -18,17 +18,14 @@
           <td>Rotation</td>
           <td><input v-model="world_transform.rotation" @change="sendConfig" type="number" min="0" max="360"/></td>
         </tr>
-        <tr >
-          <td>Null image threshold</td>
-          <table>
-            <tr v-for="key in hsv">
-              <td>{{ key }}</td>
-              <td><input v-model="null_image_threshold[key]" @change="sendConfig" type="number" min="0" max="255"/></td>
-            </tr>
-          </table>
-        <tr >
+      </table>
+      <h2>Null image</h2>
+        <tr v-for="key in hsv">
+          <td>{{ key }}</td>
+          <td><input v-model="null_image_threshold[key]" @change="sendConfig" type="number" min="0" max="255"/></td>
         </tr>
       </table>
+      <button @click="setCapturingNullImage">{{capturingNullImageStatus}}</button>
     </div>
     <div class="row" v-for="colorRow in colorRows">
     <h2>Colors</h2>
@@ -60,7 +57,8 @@ export default {
       world_transform: { origin_x: 0, origin_y: 0 },
       null_image_threshold: { hue: 10, saturation: 10, value: 10 },
       layout: '',
-      colors: []
+      colors: [],
+      capturingNullImage: false
     }
   },
   computed: {
@@ -69,6 +67,9 @@ export default {
     },
     hsv: function hsv () {
       return ['hue', 'saturation', 'value']
+    },
+    capturingNullImageStatus: function capturingNullImageStatus () {
+      return `${this.capturingNullImage ? 'Stop' : 'Start'} null image capture`
     }
   },
   methods: {
@@ -77,6 +78,10 @@ export default {
     },
     saveConfig: function sendConfig () {
       this.channel.perform('save')
+    },
+    setCapturingNullImage: function setCapturingNullImage () {
+      this.capturingNullImage = !this.capturingNullImage
+      this.channel.perform('capturing_null_image', { enabled: this.capturingNullImage })
     }
   },
   mounted: function created () {

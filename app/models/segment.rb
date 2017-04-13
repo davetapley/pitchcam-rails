@@ -93,7 +93,7 @@ class Segment
       case type
       when :line
         to = local_to_world points[1]
-        segment_canvas.line! from, to, thickness: 1, color: color
+        segment_canvas.line! from, to, thickness: 2, color: color
       when :arc
         origin = local_to_world points[1]
         radius = points[2] * world_transform.scale
@@ -101,7 +101,7 @@ class Segment
         angle_deg = (-angle / Math::PI) * 180
         start_angle_deg = mirror_x ? 90 : 0
         end_angle_deg = start_angle_deg + 90
-        segment_canvas.ellipse! origin, axes, angle_deg, start_angle_deg, end_angle_deg, thickness: 1, color: color
+        segment_canvas.ellipse! origin, axes, angle_deg, start_angle_deg, end_angle_deg, thickness: 2, color: color
       when :rectangle
         to = local_to_world points[1]
         tr = local_to_world CvPoint2D32f.new points[0].x, points[1].y

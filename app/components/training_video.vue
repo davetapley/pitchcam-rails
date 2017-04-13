@@ -6,7 +6,6 @@
     <input type="radio" id="origin" value="origin" v-model="clickMode" @change="resetClickMode">
     <label for="origin">Set origin</label>
     <br>
-    <button @click="setCapturingNullImage">{{capturingNullImageStatus}}</button>
     <p>{{nextClick}}</p>
     <p>{{boundaryStatus}}</p>
     <video id="training-video" controls loop muted ref="video" @loadedmetadata="setDefaultTrackBoundary" @click="click" @play="snap"></video>
@@ -26,8 +25,7 @@ export default {
       filePath: undefined,
       videoChannel: null,
       configChannel: null,
-      trainingRenderUri: 'data:image/png;base64,',
-      capturingNullImage: false
+      trainingRenderUri: 'data:image/png;base64,'
     }
   },
   localStorage: {
@@ -103,11 +101,6 @@ export default {
         const createdAt = Date.now()
         this.videoChannel.perform('frame', { image_uri: imageUri, created_at: createdAt })
       }
-    },
-
-    setCapturingNullImage: function setCapturingNullImage () {
-      this.capturingNullImage = !this.capturingNullImage
-      this.configChannel.perform('capturing_null_image', { enabled: this.capturingNullImage })
     }
   },
   computed: {
@@ -125,9 +118,6 @@ export default {
       }
 
       return `Boundary from ${this.boundary.topLeft.x}, ${this.boundary.topLeft.y} to ${this.boundary.bottomRight.x}, ${this.boundary.bottomRight.y}`
-    },
-    capturingNullImageStatus: function capturingNullImageStatus () {
-      return `${this.capturingNullImage ? 'Stop' : 'Start'} null image capture`
     }
   },
   created: function created () {

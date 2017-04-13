@@ -14,6 +14,13 @@ class VideoChannel < ApplicationCable::Channel
     created_at = data['created_at']
     config = Configs.instance.get uuid
 
+    DebugRenderChannel.broadcast_to uuid, id: :latest_frame, at: created_at, uri: image.to_data_uri
+
+    outline_image = image.clone
+    config.track.render_outline_to outline_image, CvColor::Green
+    DebugRenderChannel.broadcast_to uuid, id: :track, at: created_at, uri: outline_image.to_data_uri
+
+
     case config.video_mode
     when :capturing_null_image
       null_image_frame config, image, created_at
@@ -38,29 +45,33 @@ class VideoChannel < ApplicationCable::Channel
 
   def null_image_frame(config, image, created_at)
     null_image = config.null_image.add_frame image
-
-    null_image_uri = null_image.to_data_uri
-    null_image_attrs = { uri: null_image_uri, createdAt: created_at }
     debug = { frame_count: config.null_image.frame_count }
-    DebugRenderChannel.broadcast_to uuid, id: :null_image, image: null_image_attrs.to_json, debug: debug.to_json
+    DebugRenderChannel.broadcast_to uuid, id: :null_image, at: created_at, uri: null_image.to_data_uri, debug: debug.to_json
   end
 
   def race_frame(config, image, created_at)
-    masked_track_image = image #config.track_mask.mask_image image
-    masked_track_image = config.null_image.delete_from image if config.null_image
+    return unless config.null_image
+
+    diff_image = DiffImage.new config.null_image, image
+    DebugRenderChannel.broadcast_to uuid, id: :diff_image, at: created_at, uri: diff_image.diff.to_data_uri
+    DebugRenderChannel.broadcast_to uuid, id: :diff_mask, at: created_at, uri: diff_image.mask.to_data_uri
+    DebugRenderChannel.broadcast_to uuid, id: :cleaned_image, at: created_at, uri: diff_image.cleaned.to_data_uri
+
+    masked_image = config.track_mask.mask_image diff_image.cleaned
+    DebugRenderChannel.broadcast_to uuid, id: :masked_image, at: created_at, uri: masked_image.to_data_uri
+
+    return
+
 
     masked_track_image_uri = masked_track_image.to_data_uri
     masked_track_image_attrs = { uri: masked_track_image_uri, createdAt: created_at }
     car_finder = config.car_finder
-    debug = { car_radius_world: config.track.car_radius_world, expected_car_pixel_count: car_finder.expected_pixel_count }
-    DebugRenderChannel.broadcast_to uuid, id: :masked_track_image, image: masked_track_image_attrs.to_json, debug: debug.to_json
 
     # dirty_colors = car_finder.handle_image masked_track_image
 
     config.colors.each do |color|
       color_mask = color.hsv_map masked_track_image
       masked_color_image = image.clone.set CvColor::White, color_mask.not
-      config.track.render_outline_to masked_color_image, CvColor::Black
 
       positions = { world: car_finder.colors_positions[color].to_point }
       if positions[:world]
