@@ -62,17 +62,12 @@ class VideoChannel < ApplicationCable::Channel
     masked_image = config.track_mask.mask_image diff_image.cleaned
     DebugRenderChannel.broadcast_to uuid, id: :masked_image, at: created_at, uri: masked_image.to_data_uri
 
-    return
-
-
-    masked_track_image_uri = masked_track_image.to_data_uri
-    masked_track_image_attrs = { uri: masked_track_image_uri, createdAt: created_at }
     car_finder = config.car_finder
 
-    # dirty_colors = car_finder.handle_image masked_track_image
+    car_finder.handle_image masked_image
 
     config.colors.each do |color|
-      color_mask = color.hsv_map masked_track_image
+      color_mask = color.hsv_map masked_image
       masked_color_image = image.clone.set CvColor::White, color_mask.not
 
       positions = { world: car_finder.colors_positions[color].to_point }
@@ -83,12 +78,7 @@ class VideoChannel < ApplicationCable::Channel
         positions[:track] = nil
       end
 
-      masked_color_image_uri = masked_color_image.to_data_uri
-      masked_color_image_attrs = { uri: masked_color_image_uri, createdAt: created_at }
-
-      debug = car_finder.colors_debug[color]
-
-      DebugRenderChannel.broadcast_to uuid, id: color.name, image: masked_color_image_attrs.to_json, debug: debug.to_json
+      DebugRenderChannel.broadcast_to uuid, id: color.name, at: created_at, uri: masked_color_image.to_data_uri
     end
   end
 end
