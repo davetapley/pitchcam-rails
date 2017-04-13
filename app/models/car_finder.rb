@@ -1,5 +1,6 @@
 class CarFinder
-  attr_reader :colors, :car_radius, :car_postion_tolerance, :expected_pixel_count,
+  attr_reader :colors, :car_radius, :car_postion_tolerance,
+    :expected_car_pixel_count, :expected_total_pixel_count,
     :colors_positions, :colors_debug,
     :dirty_at, :dirty_colors, :min_time_for_new_position
 
@@ -7,7 +8,8 @@ class CarFinder
     @colors = colors
 
     @car_radius = car_radius_world
-    @expected_pixel_count = (car_radius_world**2 * Math::PI).round
+    @expected_car_pixel_count  = (car_radius_world**2 * Math::PI).round
+    @expected_total_pixel_count = expected_car_pixel_count * colors.count
 
     @car_postion_tolerance = 4
     @min_time_for_new_position = 5.seconds
@@ -87,7 +89,7 @@ class CarFinder
     pixel_count = map.count_non_zero
     colors_debug[color].pixel_count = pixel_count
 
-    return unless pixel_count.between? (expected_pixel_count * 0.8), (expected_pixel_count * 1.2)
+    #return unless pixel_count.between? (expected_car_pixel_count * 0.2), (expected_car_pixel_count * 1.2)
 
     dp = 2
     min_dist = 5

@@ -7,9 +7,9 @@
           <td>Lag: </td>
           <td>{{ render.lag }}ms</td>
         </tr>
-        <tr v-for="(debugValue, debugKey) in render.debug">
-          <td>{{debugKey}}:</td>
-          <td>{{debugValue}}</td>
+        <tr v-for="(metaValue, metaKey) in render.meta">
+          <td>{{metaKey}}:</td>
+          <td>{{metaValue}}</td>
         </tr>
       </table>
       <img :src="render.uri">
@@ -36,16 +36,16 @@ export default {
         const id = data.id
         const uri = data.uri
         const lag = Date.now() - new Date(data.at)
-        const debug = JSON.parse(data.debug || '{}')
+        const meta = JSON.parse(data.meta || '{}')
 
         const render = that.renders[id]
 
         if (render === undefined) {
-          that.$set(that.renders, id, { lag, uri, debug })
+          that.$set(that.renders, id, { lag, uri, meta })
         } else {
           render.lag = lag
           render.uri = uri
-          render.debug = debug
+          render.meta = meta
         }
       }
     })
