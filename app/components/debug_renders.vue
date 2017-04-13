@@ -1,7 +1,7 @@
 <template>
   <div class="container">
-    <div class="col-xs-6" v-for="render in renders">
-      <h2>{{ render.id }}</h2>
+    <div class="col-xs-6" v-for="(render, id) in renders">
+      <h2>{{ id }}</h2>
       <table>
         <tr>
           <td>Lag: </td>
@@ -26,7 +26,7 @@ export default {
   data () {
     return {
       channel: null,
-      renders: []
+      renders: {}
     }
   },
   created: function created () {
@@ -38,13 +38,10 @@ export default {
         const lag = Date.now() - new Date(data.at)
         const debug = JSON.parse(data.debug || '{}')
 
-        const render = that.renders.find((r) => {
-          const match = r.id === id
-          return match
-        })
+        const render = that.renders[id]
 
         if (render === undefined) {
-          that.renders.push({ id, lag, uri, debug })
+          that.$set(that.renders, id, { lag, uri, debug })
         } else {
           render.lag = lag
           render.uri = uri
