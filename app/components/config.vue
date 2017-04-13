@@ -20,9 +20,10 @@
         </tr>
       </table>
       <h2>Null image</h2>
-        <tr v-for="key in hsv">
-          <td>{{ key }}</td>
-          <td><input v-model="null_image_threshold[key]" @change="sendConfig" type="number" min="0" max="255"/></td>
+        <tr>
+          <td><input v-model="null_image_threshold[0]" @change="sendConfig" type="number" min="0" max="255"/></td>
+          <td><input v-model="null_image_threshold[1]" @change="sendConfig" type="number" min="0" max="255"/></td>
+          <td><input v-model="null_image_threshold[2]" @change="sendConfig" type="number" min="0" max="255"/></td>
         </tr>
       </table>
       <button @click="setCapturingNullImage">{{capturingNullImageStatus}}</button>
@@ -55,7 +56,7 @@ export default {
     return {
       channel: null,
       world_transform: { origin_x: 0, origin_y: 0 },
-      null_image_threshold: { hue: 10, saturation: 10, value: 10 },
+      null_image_threshold: [],
       layout: '',
       colors: [],
       capturingNullImage: false
@@ -94,6 +95,7 @@ export default {
         const config = data.config
         that.world_transform = config.world_transform
         that.layout = config.layout
+        that.null_image_threshold = config.null_image_threshold
         that.colors.splice(0)
         that.colors.push(...config.colors)
       }

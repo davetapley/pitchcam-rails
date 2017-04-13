@@ -29,6 +29,10 @@ module CvScalarExtensions
   def inspect
     (0..3).map { |i| self[i] }
   end
+
+  def as_json
+    (0..3).map { |i| self[i] }.as_json
+  end
 end
 
 CvScalar.prepend CvScalarExtensions

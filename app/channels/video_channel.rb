@@ -52,8 +52,10 @@ class VideoChannel < ApplicationCable::Channel
   def race_frame(config, image, created_at)
     return unless config.null_image
 
-    diff_image = DiffImage.new config.null_image, image
-    DebugRenderChannel.broadcast_to uuid, id: :diff_image, at: created_at, uri: diff_image.diff.to_data_uri
+    diff_image = DiffImage.new config.null_image.image, image, config.null_image_threshold
+    diff_image.diff.split.each_with_index do |diff, i|
+      DebugRenderChannel.broadcast_to uuid, id: "diff_image_#{i}", at: created_at, uri: diff.to_data_uri
+    end
     DebugRenderChannel.broadcast_to uuid, id: :diff_mask, at: created_at, uri: diff_image.mask.to_data_uri
     DebugRenderChannel.broadcast_to uuid, id: :cleaned_image, at: created_at, uri: diff_image.cleaned.to_data_uri
 

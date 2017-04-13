@@ -1,14 +1,14 @@
 class DiffImage
   attr_reader :base, :other, :threshold
 
-  def initialize(base, other)
+  def initialize(base, other, threshold)
     @base = base
     @other = other
-    @threshold = CvScalar.new 10, 10, 10
+    @threshold = threshold
   end
 
   def diff
-    @diff ||= base.abs_diff other
+    @diff ||= base.BGR2HSV.abs_diff other.BGR2HSV
   end
 
   def mask
