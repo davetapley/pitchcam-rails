@@ -327,8 +327,6 @@ Yes, but...
 ![](pitchme/ruby_data_uri_regex.png)
 
 
-https://github.com/dball/data_uri/blob/master/lib/data_uri/uri.rb
-
 +++
 
 ```ruby
@@ -336,13 +334,14 @@ class VideoChannel < ApplicationCable::Channel
 
   def receive(data)
     uri = URI::Data.new data['image_uri']
-    File.open('tmp/image.jpg', 'wb') { |f| f.write(uri.data) }
-    image = IplImage.load 'tmp/image.jpg'
+    data = uri.data
+    File.open('image.jpg', 'wb') { |f| f.write(data) }
+    image = IplImage.load 'image.jpg'
 ```
 
 +++
 
-![](pitchme/find_blue_on_track_arrow.png)
+![](pitchme/find_blue_on_track.png)
 
 +++
 
@@ -360,13 +359,13 @@ http://www.think-maths.co.uk/spreadsheet
 
 +++
 
-![](pitchme/find_blue_on_track_arrow.png)
+![](pitchme/find_blue_on_track.png)
 
 +++
 
 ![](pitchme/color_wheel_arrow_blue.png)
 
- <pre>#0080FF</pre>
+ # 00 80 FF
 
 +++
 
@@ -381,14 +380,15 @@ mask = image.eq blue
 
 ```ruby
 mask.save_image 'tmp/output.png'
-data = File.open('tmp/output.png', 'rb').read
-base64 = Base64.strict_encode64 data
-uri = "data:image/png;base64,#{base64}"
+mask_data = File.open('tmp/output.png', 'rb').read
+mask_base64 = Base64.strict_encode64 mask_data
+
+mask_uri = "data:image/png;base64,#{mask_base64}"
 ```
 
 +++
 
-![](pitchme/find_blue_mask.png)
+![](pitchme/find_blue_mask_bad.png)
 
 +++
 
@@ -400,11 +400,73 @@ uri = "data:image/png;base64,#{base64}"
 
 +++
 
-Photons be everywhere
-Pixels be noisy
-
-_gif of abs diff_
+![](pitchme/color_wheel_circle_blue.png)
 
 +++
 
-Let's be lazy
+```ruby
+ColorChannel.broadcast_to 'blue' mask_uri: mask_uri
+```
+
++++
+```javascript
+this.channel = this.$cable.subscriptions.create({ channel: 'ColorChannel' }, {
+  received (data) {
+    this.mask_uri = data.mask_uri
+```
+
+```html
+ <img :src="mask_uri">
+```
+
++++
+
+
+```html
+<input v-model="range.red.min" @change="setHSV" />
+<input v-model="range.red.max" @change="setHSV" />
+
+<input v-model="range.green.min" @change="setHSV" />
+<input v-model="range.green.max" @change="setHSV" />
+
+<input v-model="range.blue.min" @change="setHSV" />
+<input v-model="range.blue.max" @change="setHSV" />
+```
+
+```javascript
+methods: {
+  setHSV: function () {
+    this.channel.perform('setHSV', { range: this.range })
+```
+
++++
+
+```ruby
+class VideoChannel < ApplicationCable::Channel
+  def receive(data)
+    range = JSON.parse data['range']
+    min = CvScalar.new range['red']['min'], ...
+    max = CvScalar.new range['red']['max'], ...
+    ....
+    mask = image.in_range min, max
+  end
+end
+
++++
+![](pitchme/find_blue_mask_bad.png)
+
++++
+
++++
+
+![](pitchme/find_blue_mask.png)
+
++++
+
+![](pitchme/cv_mat_hough_circles.png)
+
++++
+
+### It's there:
+
+![](pitchme/find_blue_on_track_arrow.png)

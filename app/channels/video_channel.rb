@@ -10,6 +10,7 @@ class VideoChannel < ApplicationCable::Channel
   end
 
   def frame(data)
+    binding.pry
     image = IplImage.load_from_data_uri data['image_uri']
     created_at = data['created_at']
     config = Configs.instance.get uuid
