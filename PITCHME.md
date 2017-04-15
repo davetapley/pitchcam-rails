@@ -2,11 +2,11 @@
 
 Augmented reality board games.
 
-@davetapley
+<i class="fa fa-twitter" aria-hidden="true"></i> @davetapley
 
 +++
 
-Disclaimer:
+#### Disclaimer:
 
 Just because you can...
 
@@ -20,9 +20,7 @@ But it's been a lot of fun.
 
 +++
 
-# Demo time
-
-_Show people playing via camera_
+#### Demo
 
 +++
 
@@ -30,29 +28,21 @@ _Show people playing via camera_
 
 * Six straights
 * Ten corners
-
-+++
-
-Trivia:
-
-* 630 combinations
+* 630 combinations <!-- .element: class="fragment" -->
 
 +++
 
 #### There are walls
 
-* Around the outside of corners
+* Around the _outside_ of corners
 * On _one side_ of each straight
 
 +++
 
-### Leaving the track
+#### Leaving the track
 
-It happens
-
-Go back to where you were before
-
-_Demo_
+* It happens, it's annoying, but inevitable
+* Go back to where you were
 
 +++
 
@@ -67,8 +57,8 @@ _Let's have computers do it_
 
 #### The goal
 
-* Capture webcam images
-* Show the positions
+* Capture images 
+* Show positions if necessary
 
 +++
 
@@ -83,6 +73,8 @@ https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Taking_still_photos
 ![](pitchme/web_rtc_js.png)
 
 +++
+
+![](https://vuejs.org/images/logo.png)
 
 Let's try **Vue.js**.
 
@@ -99,6 +91,7 @@ Use **OpenCV**
 * C/C++ image processing library
 
 * Has a Ruby wrapper:
+
   https://github.com/ruby-opencv
 
 +++
@@ -109,13 +102,13 @@ Did someone say **ActionCable**?
 
 +++
 
-### Let's use
+#### Let's use
 
-|                                      |              |
-|--------------------------------------|--------------|
-| Video acquisition and rendering      | WebRTC & Vue.js       |
-| Image processing                     | OpenCV via Ruby binding      |
-| Real time asynchronous communication | ActionCable |
+|                 |              |
+|-----------------|--------------|
+| Front end       | WebRTC & Vue.js       |
+| Back end        | OpenCV |
+| Communication   | ActionCable |
 
 ---
 
@@ -184,14 +177,18 @@ https://dopiaza.org/tools/datauri/index.php
 
 ![](pitchme/imagine_uri.png)
 
-+++
-
-```html
-<img src=
-  "data:image/png;base64,iVBORw0K...">
+```
+data:image/png;base64,iVBORw0K...
 ```
 
-It does actually work!
+
++++
+
+HTML
+
+```html
+ <img src="data:image/png;base64,iVBORw0K...">
+```
 
 ---
 
@@ -205,11 +202,11 @@ It does actually work!
 
 Get a **Vue.js** component working with **ActionCable**
 
++++
+
 ![](pitchme/pong_repo.png)
 
 +++
-
-#### ActionCable and Vue.js
 
 1. Get ActionCable JS in Vue
 2. Subscribe to a channel
@@ -217,7 +214,7 @@ Get a **Vue.js** component working with **ActionCable**
 
 +++
 
-1: Get ActionCable JS in Vue.js
+JS
 
 ```javascript
 import ActionCable from 'actioncable'
@@ -230,7 +227,9 @@ Vue.prototype.$cable = cable
 ```
 
 +++
-2: Subscribe to a channel
+
+JS
+
 ```javascript
 created () {
   this.videoChannel = this.$cable.subscriptions.create(
@@ -239,10 +238,14 @@ created () {
 
 +++
 
-3: Send image
+JS
+
 ```javascript
-   this.videoChannel.send({ image: uriEncodedImage })
+this.videoChannel.send({ image: uriEncodedImage })
 ```
+
+Ruby
+
 ```ruby
 class VideoChannel < ApplicationCable::Channel
   def receive(data)
@@ -272,7 +275,7 @@ end
 
 +++
 
-#### Wiring it up
+JS
 
 ```javascript
 methods: {
@@ -304,7 +307,7 @@ Yes, but...
 
 +++
 
-#### Load it in to OpenCV
+Load the image in to OpenCV
 
 +++
 
@@ -326,22 +329,32 @@ Yes, but...
 
 ![](pitchme/ruby_data_uri_regex.png)
 
+https://github.com/dball/data_uri/blob/master/lib/data_uri/uri.rb
 
 +++
 
+Ruby
+
 ```ruby
 class VideoChannel < ApplicationCable::Channel
-
   def receive(data)
     uri = URI::Data.new data['image_uri']
     data = uri.data
-    File.open('image.jpg', 'wb') { |f| f.write(data) }
+
+    File.open('image.jpg', 'wb') do |f|
+      f.write(data)
+    end
+
     image = IplImage.load 'image.jpg'
 ```
 
 +++
 
 ![](pitchme/find_blue_on_track.png)
+
+```ruby
+image = IplImage.load 'image.jpg'
+```
 
 +++
 
@@ -361,11 +374,13 @@ http://www.think-maths.co.uk/spreadsheet
 
 ![](pitchme/find_blue_on_track.png)
 
+```ruby
+image = IplImage.load 'image.jpg'
+```
+
 +++
 
 ![](pitchme/color_wheel_arrow_blue.png)
-
- # 00 80 FF
 
 +++
 
@@ -404,16 +419,27 @@ mask_uri = "data:image/png;base64,#{mask_base64}"
 
 +++
 
+Ruby
+
 ```ruby
+mask = image.eq blue
+...
+mask_uri = "data:image/png;base64,#{mask_base64}"
 ColorChannel.broadcast_to 'blue' mask_uri: mask_uri
 ```
 
 +++
+
+JS
+
 ```javascript
-this.channel = this.$cable.subscriptions.create({ channel: 'ColorChannel' }, {
-  received (data) {
-    this.mask_uri = data.mask_uri
+this.channel = this.$cable.subscriptions.create(
+  { channel: 'ColorChannel' }, {
+    received (data) {
+      this.mask_uri = data.mask_uri
 ```
+
+HTML
 
 ```html
  <img :src="mask_uri">
@@ -421,6 +447,7 @@ this.channel = this.$cable.subscriptions.create({ channel: 'ColorChannel' }, {
 
 +++
 
+HTML
 
 ```html
 <input v-model="range.red.min" @change="setHSV" />
@@ -433,6 +460,8 @@ this.channel = this.$cable.subscriptions.create({ channel: 'ColorChannel' }, {
 <input v-model="range.blue.max" @change="setHSV" />
 ```
 
+JS
+
 ```javascript
 methods: {
   setHSV: function () {
@@ -440,6 +469,9 @@ methods: {
 ```
 
 +++
+
+
+Ruby
 
 ```ruby
 class VideoChannel < ApplicationCable::Channel
@@ -451,11 +483,7 @@ class VideoChannel < ApplicationCable::Channel
     mask = image.in_range min, max
   end
 end
-
-+++
-![](pitchme/find_blue_mask_bad.png)
-
-+++
+```
 
 +++
 
@@ -467,6 +495,6 @@ end
 
 +++
 
-### It's there:
+It's there:
 
 ![](pitchme/find_blue_on_track_arrow.png)
