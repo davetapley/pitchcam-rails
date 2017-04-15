@@ -424,7 +424,8 @@ mask_uri = "data:image/png;base64,#{mask_base64}"
 
 +++
 
-![](pitchme/color_wheel_circle_blue.png)
+![](pitchme/find_blue_mask_better.png)
+![](pitchme/edit_rgb.png)
 
 +++
 
