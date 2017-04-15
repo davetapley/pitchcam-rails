@@ -339,10 +339,10 @@ Ruby
 class VideoChannel < ApplicationCable::Channel
   def receive(data)
     uri = URI::Data.new data['image_uri']
-    data = uri.data
+    data = uri.data # aka after the comma
 
     File.open('image.jpg', 'wb') do |f|
-      f.write(data)
+      f.write data
     end
 
     image = IplImage.load 'image.jpg'
@@ -393,6 +393,10 @@ mask = image.eq blue
 
 +++
 
+More data URIs
+
+Ruby
+
 ```ruby
 mask.save_image 'tmp/output.png'
 mask_data = File.open('tmp/output.png', 'rb').read
@@ -404,6 +408,11 @@ mask_uri = "data:image/png;base64,#{mask_base64}"
 +++
 
 ![](pitchme/find_blue_mask_bad.png)
+
+```html
+ <img src="data:image/png;base64,iVBORw0K...">
+```
+
 
 +++
 
@@ -477,9 +486,9 @@ Ruby
 class VideoChannel < ApplicationCable::Channel
   def receive(data)
     range = JSON.parse data['range']
-    min = CvScalar.new range['red']['min'], ...
-    max = CvScalar.new range['red']['max'], ...
-    ....
+    min = CvScalar.new range['red']['min'], # ...
+    max = CvScalar.new range['red']['max'], # ...
+    # ....
     mask = image.in_range min, max
   end
 end
@@ -493,8 +502,19 @@ end
 
 ![](pitchme/cv_mat_hough_circles.png)
 
+```ruby
+circles = mask.hough_circles CV_HOUGH_GRADIENT, ...
+car = circles.first
+PostiionsChannel.broadcast_to 'blue', x: car.x, y: car.y if car
+
+```
+
 +++
 
 It's there:
 
 ![](pitchme/find_blue_on_track_arrow.png)
+
++++
+
+Still don't know if it's on the track
