@@ -66,7 +66,7 @@ _Let's have computers do it_
 
 ![](pitchme/web_rtc.png)
 
-https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Taking_still_photos
+<small>https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Taking_still_photos</small>
 
 +++
 
@@ -126,7 +126,7 @@ Did someone say **ActionCable**?
 
 ![](pitchme/vue_webcam_google.png)
 
-https://github.com/smronju/vue-webcam
+<small>https://github.com/smronju/vue-webcam</small>
 
 +++
 
@@ -159,19 +159,19 @@ What is `this.photo`?
 
 ![](pitchme/data_uri_mdn.png)
 
-https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs
+<small>https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs</small>
 
 +++
 
 ![](pitchme/imagine.png)
 
-http://rubyonrails.org/images/imagine.png
+<small>http://rubyonrails.org/images/imagine.png</small>
 
 +++
 
 ![](pitchme/uri_generator.png)
 
-https://dopiaza.org/tools/datauri/index.php
+<small>https://dopiaza.org/tools/datauri/index.php</small>
 
 +++
 
@@ -329,7 +329,7 @@ Load the image in to OpenCV
 
 ![](pitchme/ruby_data_uri_regex.png)
 
-https://github.com/dball/data_uri/blob/master/lib/data_uri/uri.rb
+<small>https://github.com/dball/data_uri/blob/master/lib/data_uri/uri.rb</small>
 
 +++
 
@@ -368,7 +368,7 @@ image = IplImage.load 'image.jpg'
 
 ![](pitchme/pixel_spreadsheet_1.png)
 
-http://www.think-maths.co.uk/spreadsheet
+<small>http://www.think-maths.co.uk/spreadsheet</small>
 
 +++
 
