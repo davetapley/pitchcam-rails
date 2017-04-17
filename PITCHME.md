@@ -117,7 +117,7 @@ Did someone say **ActionCable**?
 1. Get an image
 1. ActionCable to server
 1. Find cars
-1. Who moved?
+1. What happened?
 1. Results
 
 +++
@@ -177,11 +177,6 @@ What is `this.photo`?
 
 ![](pitchme/imagine_uri.png)
 
-```
-data:image/png;base64,iVBORw0K...
-```
-
-
 +++
 
 HTML
@@ -195,7 +190,7 @@ HTML
 1. ~~Get an image~~ &#10004;
 1. ActionCable to server
 1. Find cars
-1. Who moved?
+1. What happened?
 1. Results
 
 +++
@@ -302,7 +297,7 @@ Yes, but...
 1. ~~Get an image~~ &#10004;
 1. ~~ActionCable to server~~ &#10004;
 1. Find cars
-1. Who moved?
+1. What happened?
 1. Results
 
 +++
@@ -432,7 +427,7 @@ mask_uri = "data:image/png;base64,#{mask_base64}"
 Ruby
 
 ```ruby
-mask = image.eq blue
+mask = image.in_range min, max
 ...
 mask_uri = "data:image/png;base64,#{mask_base64}"
 ColorChannel.broadcast_to 'blue' mask_uri: mask_uri
@@ -454,6 +449,10 @@ HTML
 ```html
  <img :src="mask_uri">
 ```
+
++++
+
+![](pitchme/edit_rgb.png)
 
 +++
 
@@ -498,16 +497,22 @@ end
 +++
 
 ![](pitchme/find_blue_mask.png)
+![](pitchme/edit_rgb.png)
 
 +++
 
 ![](pitchme/cv_mat_hough_circles.png)
 
-```ruby
-circles = mask.hough_circles CV_HOUGH_GRADIENT, ...
-car = circles.first
-PostiionsChannel.broadcast_to 'blue', x: car.x, y: car.y if car
++++
 
+```ruby
+circles = mask.hough_circles # ...
+car = circles.first
+if car
+  CarChannel.broadcast_to 'blue', x: car.x, y: car.y
+else
+  CarChannel.broadcast_to 'blue', missing: true
+end
 ```
 
 +++
@@ -518,4 +523,113 @@ It's there:
 
 +++
 
+```
++-------------+
+|             |
+| <element>   |
+|             | <-----+
+| </element>  |       |
+|             |       |
++-------------+       |       +------------+
+|             |       +-----> |            |
+| <element>   |               |   Rails    |
+|             | <-----------> |            |
+| </element>  |               |   server   |
+|             |       +-----> |            |
++-------------+       |       +------------+
+|             |       |
+| <element>   |       |
+|             | <-----+
+| </element>  |
+|             |
++-------------+
++++
+
+
 Still don't know if it's on the track
+
+---
+
+1. ~~Get an image~~ &#10004;
+1. ~~ActionCable to server~~ &#10004;
+1. ~~Find cars~~ &#10004;
+1. What happened?
+1. Results
+
++++
+
+![](pitchme/track_table_floor_colors.png)
+
++++
+
+#### Be lazy
+
+1. On the track
+1. Everywhere else
+
++++
+
+#### Mask 2: Track Mask
+
+![](pitchme/track_mask.png)
+
++++
+
+![](pitchme/track_mask_process.png)
+
++++
+
+#### The making of a mask
+
+Start at the beginning
+
+Draw a rectangle
+
++++
+
+Where?
+
+1. Position
+1. Rotation
+1. Scale
+
++++
+
+_gif of positioning start tile_
+
++++
+
+![](pitchme/track_table_floor.png)
+
+S&#10004; L S L L R L L
+
++++
+
+Figure out where the next piece  goes:
+
+1. Position: One _scale_ along
+1. Rotation: Same as the start
+1. ~~~Scale~~~ (always the same)
+
++++
+
+_gif of building up a circle_
+
++++
+
+_image of mask with S L_
+
++++
+
+
+Figure out where the next-next piece goes:
+
+1. Position: One _scale_ along, and one _scale_ down
+1. Rotation: Quarter turn to the left
+
++++
+
+![](pitchme/build_track.gif)
+
++++
+
