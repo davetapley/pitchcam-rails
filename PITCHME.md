@@ -302,10 +302,6 @@ Yes, but...
 
 +++
 
-Load the image in to OpenCV
-
-+++
-
 ![](pitchme/open_cv_ipl_image.png)
 
 +++
@@ -482,7 +478,7 @@ JS
 ```javascript
 methods: {
   setHSV: function () {
-    this.channel.perform('setHSV', { range: this.range })
+    this.channel.perform('set_hsv_range', { range: this.range })
 ```
 
 +++
@@ -491,7 +487,7 @@ Ruby
 
 ```ruby
 class VideoChannel < ApplicationCable::Channel
-  def receive(data)
+  def set_hsv_range(data)
     range = JSON.parse data['range']
     min = CvScalar.new range['red']['min'], # ...
     max = CvScalar.new range['red']['max'], # ...
@@ -617,3 +613,20 @@ Figure out where the next-next piece goes:
 
 +++
 
+#### That's it
+
+_image of masked track_
+
+---
+
+DEMO
+
++++
+
+* Questions?
+* Comments?
+* Feedback?
+
+<i class="fa fa-twitter" aria-hidden="true"></i> @davetapley
+
+https://github.com/dukedave/pitchcam-rails
