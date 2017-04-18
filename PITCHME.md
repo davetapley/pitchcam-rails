@@ -116,9 +116,9 @@ Did someone say **ActionCable**?
 
 1. Get an image
 1. ActionCable to server
-1. Find cars
+1. Load into OpenCV
 1. What happened?
-1. Results
+1. Who fell off?
 
 +++
 
@@ -189,9 +189,9 @@ HTML
 
 1. ~~Get an image~~ &#10004;
 1. ActionCable to server
-1. Find cars
+1. Load into OpenCV
 1. What happened?
-1. Results
+1. Who fell off?
 
 +++
 
@@ -296,9 +296,9 @@ Yes, but...
 
 1. ~~Get an image~~ &#10004;
 1. ~~ActionCable to server~~ &#10004;
-1. Find cars
+1. Load into OpenCV
 1. What happened?
-1. Results
+1. Who fell off?
 
 +++
 
@@ -365,6 +365,14 @@ image = IplImage.load 'image.jpg'
 
 <small>http://www.think-maths.co.uk/spreadsheet</small>
 
+---
+
+1. ~~Get an image~~ &#10004;
+1. ~~ActionCable to server~~ &#10004;
+1. ~~Load into OpenCV~~ &#10004;
+1. Find the cars
+1. Who fell off?
+
 +++
 
 ![](pitchme/find_blue_on_track.png)
@@ -419,8 +427,8 @@ mask_uri = "data:image/png;base64,#{mask_base64}"
 
 +++
 
-![](pitchme/find_blue_mask_better.png)
-![](pitchme/edit_rgb.png)
+1. Visualize the mask with some `min` and `max`
+1. Edit the `min` and `max`
 
 +++
 
@@ -452,7 +460,7 @@ HTML
 
 +++
 
-![](pitchme/edit_rgb.png)
+![](pitchme/find_blue_mask_better.png)
 
 +++
 
@@ -479,7 +487,6 @@ methods: {
 
 +++
 
-
 Ruby
 
 ```ruby
@@ -493,6 +500,10 @@ class VideoChannel < ApplicationCable::Channel
   end
 end
 ```
+
++++
+
+![](pitchme/edit_rgb.png)
 
 +++
 
@@ -521,40 +532,13 @@ It's there:
 
 ![](pitchme/find_blue_on_track_arrow.png)
 
-+++
-
-```
-+-------------+
-|             |
-| <element>   |
-|             | <-----+
-| </element>  |       |
-|             |       |
-+-------------+       |       +------------+
-|             |       +-----> |            |
-| <element>   |               |   Rails    |
-|             | <-----------> |            |
-| </element>  |               |   server   |
-|             |       +-----> |            |
-+-------------+       |       +------------+
-|             |       |
-| <element>   |       |
-|             | <-----+
-| </element>  |
-|             |
-+-------------+
-+++
-
-
-Still don't know if it's on the track
-
 ---
 
 1. ~~Get an image~~ &#10004;
 1. ~~ActionCable to server~~ &#10004;
-1. ~~Find cars~~ &#10004;
-1. What happened?
-1. Results
+1. ~~Load into OpenCV~~ &#10004;
+1. ~~~Find the cars~~~&#10004;
+1. Who fell off?
 
 +++
 
