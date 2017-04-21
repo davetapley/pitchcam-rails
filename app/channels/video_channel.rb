@@ -20,7 +20,7 @@ class VideoChannel < ApplicationCable::Channel
     config.track.render_outline_to outline_image, CvColor::Green
     DebugRenderChannel.broadcast_to uuid, id: :outline, at: created_at, uri: outline_image.to_data_uri
 
-    masked_image = image #config.track_mask.mask_image image
+    masked_image = config.track_mask.mask_image image
     DebugRenderChannel.broadcast_to uuid, id: :masked, at: created_at, uri: masked_image.to_data_uri
 
     case config.video_mode
@@ -33,14 +33,16 @@ class VideoChannel < ApplicationCable::Channel
     VideoChannel.broadcast_to uuid, action: 'snap'
   end
 
-  def render_color_crosshair_to(image, position)
+  def render_color_crosshair_to(image, position, color = CvColor::Black, text = nil)
     horiz_from = CvPoint.new 0, position.y
     horiz_to = CvPoint.new image.width, position.y
-    image.line! horiz_from, horiz_to, thickness: 1, color: CvColor::Green
+    image.line! horiz_from, horiz_to, thickness: 1, color: color
+
+    image.put_text! text, horiz_from, CvFont.new(:simplex), color if text
 
     vert_from = CvPoint.new position.x, 0
     vert_to = CvPoint.new position.x, image.height
-    image.line! vert_from, vert_to, thickness: 1, color: CvColor::Green
+    image.line! vert_from, vert_to, thickness: 1, color: color
   end
 
   private
@@ -64,12 +66,15 @@ class VideoChannel < ApplicationCable::Channel
     diff_mask_meta = { max_car_pixels: car_finder.expected_total_pixel_count, pixels: diff_mask.count_non_zero }
     DebugRenderChannel.broadcast_to uuid, id: :diff_mask, at: created_at, uri: diff_mask.to_data_uri, meta: diff_mask_meta.to_json
 
+    result_image = image.clone
     panic = diff_mask.count_non_zero > car_finder.expected_total_pixel_count
+    result_image.put_text! 'PANIC', CvPoint.new(image.rows / 2, image.columns / 2), CvFont.new(:simplex, hscale: 5, thickness: 3), CvColor::Red if panic
 
     cleaned_image = diff_image.cleaned
     DebugRenderChannel.broadcast_to uuid, id: :cleaned_image, at: created_at, uri: cleaned_image.to_data_uri, meta: { panic: panic }.to_json
 
     car_finder.handle_image cleaned_image unless panic
+
 
     config.colors.each do |color|
       color_mask = color.hsv_map cleaned_image
@@ -80,11 +85,14 @@ class VideoChannel < ApplicationCable::Channel
       if positions[:world]
         positions[:track] = config.track.position_from_world positions[:world]
         render_color_crosshair_to cleaned_color_image, positions[:world]
+        render_color_crosshair_to result_image, positions[:world], color.cv_color, color.name
       else
         positions[:track] = nil
       end
 
       DebugRenderChannel.broadcast_to uuid, id: color.name, at: created_at, uri: cleaned_color_image.to_data_uri
+
     end
+    DebugRenderChannel.broadcast_to uuid, id: :result, at: created_at, uri: result_image.to_data_uri
   end
 end
