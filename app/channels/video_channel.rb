@@ -33,18 +33,6 @@ class VideoChannel < ApplicationCable::Channel
     VideoChannel.broadcast_to uuid, action: 'snap'
   end
 
-  def render_color_crosshair_to(image, position, color = CvColor::Black, text = nil)
-    horiz_from = CvPoint.new 0, position.y
-    horiz_to = CvPoint.new image.width, position.y
-    image.line! horiz_from, horiz_to, thickness: 1, color: color
-
-    image.put_text! text, horiz_from, CvFont.new(:simplex), color if text
-
-    vert_from = CvPoint.new position.x, 0
-    vert_to = CvPoint.new position.x, image.height
-    image.line! vert_from, vert_to, thickness: 1, color: color
-  end
-
   private
 
   def null_image_frame(config, image, created_at)
@@ -81,14 +69,16 @@ class VideoChannel < ApplicationCable::Channel
       DebugRenderChannel.broadcast_to uuid, id: "#{ color.name }_mask", at: created_at, uri: color_mask.to_data_uri
       cleaned_color_image = image.clone.set CvColor::White, color_mask.not
 
-      positions = { world: car_finder.colors_positions[color].to_point }
-      if positions[:world]
-        positions[:track] = config.track.position_from_world positions[:world]
-        render_color_crosshair_to cleaned_color_image, positions[:world]
-        render_color_crosshair_to result_image, positions[:world], color.cv_color, color.name
+      position = car_finder.colors_positions[color].to_point
+      car_tracker = config.car_trackers[color]
+      if position
+        cleaned_color_image.crosshair! position
+        car_tracker.on_track! position
       else
-        positions[:track] = nil
+        car_tracker.off_track!
       end
+
+      car_tracker.render_last_position_to result_image
 
       DebugRenderChannel.broadcast_to uuid, id: color.name, at: created_at, uri: cleaned_color_image.to_data_uri
 

@@ -25,7 +25,7 @@ class Config
   include ActiveModel::Serializers::JSON
 
   attr_accessor :layout
-  attr_reader :updated_at, :world_transform, :colors, :color_window_on, :video_mode, :null_image, :null_image_threshold
+  attr_reader :updated_at, :world_transform, :colors, :color_window_on, :video_mode, :null_image, :null_image_threshold, :car_trackers
 
   def self.from_disk
     Config.new.tap do |new_config|
@@ -81,6 +81,9 @@ class Config
     hash.delete('null_image_threshold').tap do |t|
       @null_image_threshold = CvScalar.new(*t) if t
     end
+    @null_image = nil
+
+    @car_trackers = Hash[colors.map { |color| [color, CarTracker.new(color)] }]
 
     hash.each do |key, value|
       send("#{key}=", value)
@@ -90,7 +93,7 @@ class Config
   end
 
   def attributes
-    instance_values.except 'updated_at', 'track', 'track_mask', 'car_finder', 'null_image', 'video_mode'
+    instance_values.except 'updated_at', 'track', 'track_mask', 'car_finder', 'null_image', 'video_mode', 'car_trackers'
   end
 
   def color_names

@@ -21,6 +21,16 @@ module CvMatExtensions
     output_encoded = Base64.strict_encode64 File.open(tmp_file, 'rb').read
     "data:image/png;base64,#{output_encoded}"
   end
+
+  def crosshair!(position, color = CvColor::Black)
+    horiz_from = CvPoint.new 0, position.y
+    horiz_to = CvPoint.new width, position.y
+    line! horiz_from, horiz_to, thickness: 1, color: color
+
+    vert_from = CvPoint.new position.x, 0
+    vert_to = CvPoint.new position.x, height
+    line! vert_from, vert_to, thickness: 1, color: color
+  end
 end
 
 CvMat.prepend CvMatExtensions
