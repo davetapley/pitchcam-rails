@@ -117,7 +117,7 @@ Did someone say **ActionCable**?
 1. Get an image
 1. ActionCable to server
 1. Load into OpenCV
-1. What happened?
+1. Find the cars
 1. Who fell off?
 
 +++
@@ -190,7 +190,7 @@ HTML
 1. ~~Get an image~~ &#10004;
 1. ActionCable to server
 1. Load into OpenCV
-1. What happened?
+1. Find the cars
 1. Who fell off?
 
 +++
@@ -297,7 +297,7 @@ Yes, but...
 1. ~~Get an image~~ &#10004;
 1. ~~ActionCable to server~~ &#10004;
 1. Load into OpenCV
-1. What happened?
+1. Find the cars
 1. Who fell off?
 
 +++
@@ -392,9 +392,12 @@ mask = image.eq blue
 
 +++
 
-More data URIs
+![](pitchme/cv_mat_save_image.png)
 
-Ruby
++++
+
+
+More data URIs
 
 ```ruby
 mask.save_image 'tmp/output.png'
