@@ -616,13 +616,32 @@ Figure out where the next-next piece goes:
 
 +++
 
-#### That's it
+1. Store where we last saw a car
+1. Show where they are, or:
+1. Show where they were.
 
-_image of masked track_
++++
+
+1. ~~Get an image~~ &#10004;
+1. ~~ActionCable to server~~ &#10004;
+1. ~~Load into OpenCV~~ &#10004;
+1. ~~~Find the cars~~~&#10004;
+1. ~~~Who fell off?~~~&#10004;
 
 ---
 
 DEMO
+
++++
+
+### Errata
+
+1. More accurate track masking
+1. HSV > RGB
+1. Null track image removal
+1. Panic mode
+1. Frame smoothing
+1. Turn detection
 
 +++
 
