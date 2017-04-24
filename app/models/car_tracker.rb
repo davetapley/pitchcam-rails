@@ -9,9 +9,13 @@ class CarTracker
     @on_track
   end
 
+  def waiting?
+    @positions.empty?
+  end
+
   def update!(position)
     if position.is_a? CarFinder::OnTrack
-      if @positions.empty? || on_track? || close_to_last_position?(position)
+      if waiting? || on_track? || close_to_last_position?(position)
         @positions << position
         @on_track = true
       end

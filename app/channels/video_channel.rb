@@ -62,11 +62,11 @@ class VideoChannel < ApplicationCable::Channel
     non_zero_count = diff_mask.count_non_zero
     panic = non_zero_count > expected_total_pixel_count
 
-    if panic
-      panic_text = "#{ non_zero_count } > #{ expected_total_pixel_count }"
-      result_image.put_text! 'PANIC', CvPoint.new(image.rows / 2, image.columns / 2), CvFont.new(:simplex, hscale: 5, thickness: 3), CvColor::Red
-      result_image.put_text! panic_text, CvPoint.new(image.rows / 2, (image.columns / 2) + 50), CvFont.new(:simplex, thickness: 2), CvColor::Red
-    end
+    #if panic
+    #  panic_text = "#{ non_zero_count } > #{ expected_total_pixel_count }"
+    #  result_image.put_text! 'PANIC', CvPoint.new(image.rows / 2, image.columns / 2), CvFont.new(:simplex, hscale: 5, thickness: 3), CvColor::Red
+    #  result_image.put_text! panic_text, CvPoint.new(image.rows / 2, (image.columns / 2) + 50), CvFont.new(:simplex, thickness: 2), CvColor::Red
+    #end
 
     cleaned_image = diff_image.cleaned
     #DebugRenderChannel.broadcast_to uuid, id: :cleaned_image, at: created_at, uri: cleaned_image.to_data_uri, meta: { panic: panic }.to_json
@@ -75,17 +75,18 @@ class VideoChannel < ApplicationCable::Channel
 
     config.colors.each do |color|
       color_mask = color.hsv_map cleaned_image
-      #DebugRenderChannel.broadcast_to uuid, id: "#{ color.name }_mask", at: created_at, uri: color_mask.to_data_uri
+      DebugRenderChannel.broadcast_to uuid, id: "#{ color.name }_mask", at: created_at, uri: color_mask.to_data_uri
       cleaned_color_image = image.clone.set CvColor::White, color_mask.not
 
       position = car_finder.colors_positions[color]
       cleaned_color_image.crosshair! position.to_point if position.is_a? CarFinder::OnTrack
       car_tracker = config.car_trackers[color]
+      next unless car_tracker
       car_tracker.update! position
 
       car_tracker.render_last_position_to result_image
-      #car_info = { onTrack: car_tracker.on_track?, waiting: car_tracker.waiting? }
-      #CarTrackerChannel.broadcast_to uuid, action: 'info', name: color.name, info: car_info
+      car_info = { onTrack: car_tracker.on_track?, waiting: car_tracker.waiting? }
+      CarTrackerChannel.broadcast_to uuid, action: 'info', name: color.name, info: car_info
 
       #DebugRenderChannel.broadcast_to uuid, id: color.name, at: created_at, uri: cleaned_color_image.to_data_uri
 
