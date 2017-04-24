@@ -580,37 +580,37 @@ Where?
 
 +++
 
-_gif of positioning start tile_
+![](pitchme/positioning_start_tile.gif)
 
 +++
 
-![](pitchme/track_table_floor.png)
+![](pitchme/start_masked.png)
 
-S&#10004; L S L L R L L
+S&#10004; R R L R R S R
 
 +++
 
 Figure out where the next piece  goes:
 
-1. Position: One _scale_ along
+1. Position: One _scale_ up
 1. Rotation: Same as the start
-1. ~~~Scale~~~ (always the same)
+1. ~~Scale~~ (always the same)
 
 +++
 
-_gif of building up a circle_
+![](pitchme/making_corner.gif)
 
 +++
 
-_image of mask with S L_
+![](pitchme/masked_sr.png)
 
 +++
 
 
-Figure out where the next-next piece goes:
+Figure out where the next piece goes:
 
-1. Position: One _scale_ along, and one _scale_ down
-1. Rotation: Quarter turn to the left
+1. Position: One _scale_ right
+1. Rotation: Quarter turn to the right
 
 +++
 
@@ -627,8 +627,8 @@ Figure out where the next-next piece goes:
 1. ~~Get an image~~ &#10004;
 1. ~~ActionCable to server~~ &#10004;
 1. ~~Load into OpenCV~~ &#10004;
-1. ~~~Find the cars~~~&#10004;
-1. ~~~Who fell off?~~~&#10004;
+1. ~~Find the cars~~&#10004;
+1. ~~Who fell off?~~&#10004;
 
 ---
 
