@@ -459,7 +459,8 @@ HTML
 
 +++
 
-![](pitchme/find_blue_mask_better.png)
+1. ~~Visualize the mask with some `min` and `max`~~ &#10004;
+1. Edit the `min` and `max`
 
 +++
 
@@ -502,12 +503,13 @@ end
 
 +++
 
-![](pitchme/edit_rgb.png)
+![](pitchme/pink_mask_tuning.gif)
 
 +++
 
-![](pitchme/find_blue_mask.png)
-![](pitchme/edit_rgb.png)
+Yes but where?
+
+![](pitchme/find_blue_on_track_arrow.png)
 
 +++
 
@@ -536,7 +538,7 @@ It's there:
 1. ~~Get an image~~ &#10004;
 1. ~~ActionCable to server~~ &#10004;
 1. ~~Load into OpenCV~~ &#10004;
-1. ~~~Find the cars~~~&#10004;
+1. ~~Find the cars~~&#10004;
 1. Who fell off?
 
 +++
