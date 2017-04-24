@@ -30,7 +30,17 @@ class CarTracker
     point = last_position.to_point
     image.crosshair! point, @color.cv_color
     text = "#{ @color.name } #{ on_track? ? '' : '?' }"
-    image.put_text! text, CvPoint.new(0, point.y), CvFont.new(:simplex), @color.cv_color
+
+    label_position = case @color.name
+                     when 'blue'
+                       CvPoint.new image.columns - 100, point.y
+                     when 'orange'
+                       CvPoint.new point.x, image.rows - 20
+                     else
+                       CvPoint.new 0, point.y
+                     end
+
+    image.put_text! text, label_position, CvFont.new(:simplex, thickness: 2), @color.cv_color
   end
 
   private

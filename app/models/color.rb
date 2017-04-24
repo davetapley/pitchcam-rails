@@ -26,10 +26,7 @@ class Color
   end
 
   def cv_color
-    mat = CvMat.new 1, 2
-    mat[0] = hsv_low_cv_scalar
-    mat[1] = hsv_high_cv_scalar
-    mat.HSV2BGR.avg
+    "CvColor::#{ name.titleize }".constantize
   end
 
   private

@@ -1,6 +1,9 @@
 require 'opencv'
 include OpenCV
 
+CvColor::Pink = CvColor::Fuchsia
+CvColor::Orange = CvScalar.new 0x00, 0x7f, 0xff
+
 module CvPointExtensions
   def inspect
     "(#{ x.round 2 }, #{ y.round 2 })"
@@ -25,11 +28,11 @@ module CvMatExtensions
   def crosshair!(position, color = CvColor::Black)
     horiz_from = CvPoint.new 0, position.y
     horiz_to = CvPoint.new width, position.y
-    line! horiz_from, horiz_to, thickness: 1, color: color
+    line! horiz_from, horiz_to, thickness: 2, color: color
 
     vert_from = CvPoint.new position.x, 0
     vert_to = CvPoint.new position.x, height
-    line! vert_from, vert_to, thickness: 1, color: color
+    line! vert_from, vert_to, thickness: 2, color: color
   end
 end
 
