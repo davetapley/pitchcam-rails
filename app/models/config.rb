@@ -81,7 +81,6 @@ class Config
     hash.delete('null_image_threshold').tap do |t|
       @null_image_threshold = CvScalar.new(*t) if t
     end
-    @null_image = nil
 
     @car_trackers = Hash[colors.map { |color| [color, CarTracker.new(color)] }]
 

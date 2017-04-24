@@ -7,6 +7,7 @@ import config from 'components/config'
 import debugRenders from 'components/debug_renders'
 import trainingVideo from 'components/training_video'
 import webcamVideo from 'components/webcam_video'
+import carTracker from 'components/car_tracker'
 
 const cable = ActionCable.createConsumer('ws://localhost:28080/cable')
 
@@ -26,7 +27,8 @@ export default function (template) {
       config,
       debugRenders,
       trainingVideo,
-      webcamVideo
+      webcamVideo,
+      carTracker
     }
   })
 }
