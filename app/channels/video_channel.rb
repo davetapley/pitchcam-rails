@@ -55,8 +55,18 @@ class VideoChannel < ApplicationCable::Channel
     #DebugRenderChannel.broadcast_to uuid, id: :diff_mask, at: created_at, uri: diff_mask.to_data_uri, meta: diff_mask_meta.to_json
 
     result_image = image.clone
-    panic = diff_mask.count_non_zero > car_finder.expected_total_pixel_count
-    result_image.put_text! 'PANIC', CvPoint.new(image.rows / 2, image.columns / 2), CvFont.new(:simplex, hscale: 5, thickness: 3), CvColor::Red if panic
+
+    # PANIC MODE
+    expected_car_pixel_count  = (config.track.car_radius_world**2 * Math::PI).round
+    expected_total_pixel_count = expected_car_pixel_count * (config.cars_present_count + 1)
+    non_zero_count = diff_mask.count_non_zero
+    panic = non_zero_count > expected_total_pixel_count
+
+    if panic
+      panic_text = "#{ non_zero_count } > #{ expected_total_pixel_count }"
+      result_image.put_text! 'PANIC', CvPoint.new(image.rows / 2, image.columns / 2), CvFont.new(:simplex, hscale: 5, thickness: 3), CvColor::Red
+      result_image.put_text! panic_text, CvPoint.new(image.rows / 2, (image.columns / 2) + 50), CvFont.new(:simplex, thickness: 2), CvColor::Red
+    end
 
     cleaned_image = diff_image.cleaned
     #DebugRenderChannel.broadcast_to uuid, id: :cleaned_image, at: created_at, uri: cleaned_image.to_data_uri, meta: { panic: panic }.to_json
@@ -77,7 +87,7 @@ class VideoChannel < ApplicationCable::Channel
       #car_info = { onTrack: car_tracker.on_track?, waiting: car_tracker.waiting? }
       #CarTrackerChannel.broadcast_to uuid, action: 'info', name: color.name, info: car_info
 
-      DebugRenderChannel.broadcast_to uuid, id: color.name, at: created_at, uri: cleaned_color_image.to_data_uri
+      #DebugRenderChannel.broadcast_to uuid, id: color.name, at: created_at, uri: cleaned_color_image.to_data_uri
 
     end
 
