@@ -7,4 +7,9 @@ class CarTrackerChannel < ApplicationCable::Channel
       CarTrackerChannel.broadcast_to uuid, action: 'addCar', name: car.name
     end
   end
+
+  def reset
+    config = Configs.instance.get uuid
+    config.reset_car_trackers!
+  end
 end

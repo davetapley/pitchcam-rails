@@ -1,6 +1,7 @@
 <template>
   <div class="container">
     <img v-if="imageUri" :src="imageUri">
+    <button type="submit" @click="reset">Reset</button>
     <div class="col-xs-4" v-for="(carData, carName) in cars">
       <h3>{{carName}}</h3>
       <tr v-for="(dataValue, dataKey) in carData">
@@ -42,6 +43,11 @@ export default {
         }
       }
     })
+  },
+  methods: {
+    reset: function reset () {
+      this.channel.perform('reset')
+    }
   }
 }
 </script>

@@ -111,6 +111,14 @@ class Config
     @car_finder ||= CarFinder.new colors, track.car_radius_world
   end
 
+  def reset_car_trackers!
+    @car_trackers = Hash[colors.map { |color| [color, CarTracker.new(color)] }]
+  end
+
+  def cars_present_count
+    @car_trackers.values.count { |tracker| tracker.last_position.present? }
+  end
+
   def start_null_image_capture
     @null_image = SmoothedImage.new
     @video_mode = :capturing_null_image
