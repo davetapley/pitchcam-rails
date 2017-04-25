@@ -53,11 +53,15 @@ But it's been a lot of fun.
 
 _Let's have computers do it_
 
++++
+
+#### End demo
+
 ---
 
 #### The goal
 
-* Capture images 
+* Capture images
 * Show positions if necessary
 
 +++
@@ -633,17 +637,6 @@ Figure out where the next piece goes:
 ---
 
 DEMO
-
-+++
-
-### Errata
-
-1. More accurate track masking
-1. HSV > RGB
-1. Null track image removal
-1. Panic mode
-1. Frame smoothing
-1. Turn detection
 
 +++
 
