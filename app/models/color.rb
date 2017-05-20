@@ -29,6 +29,14 @@ class Color
     "CvColor::#{ name.titleize }".constantize
   end
 
+  def calibrator(car_radius_world)
+    @calibrator ||= CarCalibrator.new car_radius_world
+  end
+
+  def reset_calibrator
+    @calibrator = nil
+  end
+
   private
 
   def hsv_low_cv_scalar

@@ -22,6 +22,12 @@ class ConfigChannel < ApplicationCable::Channel
   def capturing_null_image(data)
     enabled = data['enabled']
     config = Configs.instance.get uuid
-    enabled ? config.start_null_image_capture : config.end_null_image_capture
+    enabled ? config.start_null_image_capture : config.start_quali
+  end
+
+  def quali(data)
+    enabled = data['enabled']
+    config = Configs.instance.get uuid
+    config.start_quali if enabled
   end
 end

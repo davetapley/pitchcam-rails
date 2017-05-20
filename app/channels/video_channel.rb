@@ -26,7 +26,9 @@ class VideoChannel < ApplicationCable::Channel
     case config.video_mode
     when :capturing_null_image
       null_image_frame config, masked_image, created_at
-    else
+    when :quali
+      quali_frame config, masked_image, created_at
+    when :race
       race_frame config, masked_image, created_at
     end
 
@@ -39,6 +41,34 @@ class VideoChannel < ApplicationCable::Channel
     null_image = config.null_image.add_frame image
     meta = { frame_count: config.null_image.frame_count }
     DebugRenderChannel.broadcast_to uuid, id: :null_image, at: created_at, uri: null_image.to_data_uri, meta: meta.to_json
+  end
+
+  def quali_frame(config, image, created_at)
+    return unless config.null_image
+
+    diff_image = DiffImage.new config.null_image.image, image, config.null_image_threshold
+    diff_mask = diff_image.mask
+
+    # PANIC MODE
+    expected_car_pixel_count  = (config.track.car_radius_world**2 * Math::PI).round
+    expected_total_pixel_count = expected_car_pixel_count * (config.cars_present_count + 1)
+    non_zero_count = diff_mask.count_non_zero
+    panic = non_zero_count > (expected_total_pixel_count * 1.2)
+
+    cleaned_image = diff_image.cleaned
+
+    if panic
+      panic_text = "#{ non_zero_count } > #{ expected_total_pixel_count }"
+      cleaned_image.put_text! 'PANIC', CvPoint.new(image.rows / 2, image.columns / 2), CvFont.new(:simplex, hscale: 5, thickness: 3), CvColor::Red
+      cleaned_image.put_text! panic_text, CvPoint.new(image.rows / 2, (image.columns / 2) + 50), CvFont.new(:simplex, thickness: 2), CvColor::Red
+    else
+      color = config.current_color
+      calibrator = color.calibrator config.track.car_radius_world
+      calibrator.handle_image diff_mask, image
+      DebugRenderChannel.broadcast_to uuid, id: :calibrator, at: created_at, uri: calibrator.smoothed_image_uri, meta: calibrator.debug.to_json
+    end
+
+    DebugRenderChannel.broadcast_to uuid, id: :cleaned_image, at: created_at, uri: cleaned_image.to_data_uri, meta: { panic: panic }.to_json
   end
 
   def race_frame(config, image, created_at)

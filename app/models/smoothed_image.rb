@@ -1,7 +1,7 @@
 class SmoothedImage
   attr_reader :image, :frame_count
 
-  delegate :abs_diff, to: :image
+  delegate :abs_diff, :to_data_uri, :present?, to: :image
 
   def add_frame(new_frame)
     if image.nil?

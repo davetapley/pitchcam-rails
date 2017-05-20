@@ -25,7 +25,7 @@ class Config
   include ActiveModel::Serializers::JSON
 
   attr_accessor :layout
-  attr_reader :updated_at, :world_transform, :colors, :color_window_on, :video_mode, :null_image, :null_image_threshold, :car_trackers
+  attr_reader :updated_at, :world_transform, :colors, :color_window_on, :video_mode, :null_image, :null_image_threshold, :car_trackers, :current_color
 
   def self.from_disk
     Config.new.tap do |new_config|
@@ -60,6 +60,8 @@ class Config
         end
       end
     end
+
+    @current_color = colors.first
   end
 
   def attributes=(hash)
@@ -76,6 +78,8 @@ class Config
           new_color.attributes = color_attrs
         end
       end
+
+      @current_color = colors.first
     end
 
     hash.delete('null_image_threshold').tap do |t|
@@ -92,7 +96,7 @@ class Config
   end
 
   def attributes
-    instance_values.except 'updated_at', 'track', 'track_mask', 'car_finder', 'null_image', 'video_mode', 'car_trackers'
+    instance_values.except 'updated_at', 'track', 'track_mask', 'car_finder', 'null_image', 'video_mode', 'car_trackers', 'current_color'
   end
 
   def color_names
@@ -122,6 +126,11 @@ class Config
   def start_null_image_capture
     @null_image = SmoothedImage.new
     @video_mode = :capturing_null_image
+  end
+
+  def start_quali
+    @video_mode = :quali
+    @current_color.reset_calibrator
   end
 
   def end_null_image_capture

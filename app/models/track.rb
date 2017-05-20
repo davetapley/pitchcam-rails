@@ -23,7 +23,7 @@ class Track
 
   attr_reader :segments, :car_radius_world
 
-  CAR_RADIUS_TRACK = 0.1
+  CAR_RADIUS_TRACK = 0.078
 
   def initialize(world_transform, layout)
     @car_radius_world = CAR_RADIUS_TRACK * world_transform.scale

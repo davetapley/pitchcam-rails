@@ -27,6 +27,7 @@
         </tr>
       </table>
       <button @click="setCapturingNullImage">{{capturingNullImageStatus}}</button>
+      <button @click="setQuali">start quali</button>
     </div>
     <div class="row" v-for="colorRow in colorRows">
     <h2>Colors</h2>
@@ -83,6 +84,9 @@ export default {
     setCapturingNullImage: function setCapturingNullImage () {
       this.capturingNullImage = !this.capturingNullImage
       this.channel.perform('capturing_null_image', { enabled: this.capturingNullImage })
+    },
+    setQuali: function setQuali () {
+      this.channel.perform('quali', { enabled: true })
     }
   },
   mounted: function created () {
