@@ -65,7 +65,9 @@ class VideoChannel < ApplicationCable::Channel
       color = config.current_color
       calibrator = color.calibrator config.track.car_radius_world
       calibrator.handle_image diff_mask, image
-      DebugRenderChannel.broadcast_to uuid, id: :calibrator, at: created_at, uri: calibrator.smoothed_image_uri, meta: calibrator.debug.to_json
+
+      uris = config.colors.map { |c| c.calibrator(config.track.car_radius_world).smoothed_image_uri }
+      DebugRenderChannel.broadcast_to uuid, id: :calibrator, at: created_at, uri: uris, meta: calibrator.debug.to_json
     end
 
     DebugRenderChannel.broadcast_to uuid, id: :cleaned_image, at: created_at, uri: cleaned_image.to_data_uri, meta: { panic: panic }.to_json

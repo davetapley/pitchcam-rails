@@ -133,6 +133,10 @@ class Config
     @current_color.reset_calibrator
   end
 
+  def next_color
+    @current_color = @colors[@colors.index(@current_color) + 1 % @colors.size]
+  end
+
   def end_null_image_capture
     @video_mode = nil
   end

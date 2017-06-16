@@ -26,8 +26,12 @@ class ConfigChannel < ApplicationCable::Channel
   end
 
   def quali(data)
-    enabled = data['enabled']
     config = Configs.instance.get uuid
-    config.start_quali if enabled
+    case data['event']
+    when 'reset'
+      config.start_quali
+    when 'next'
+      config.next_color
+    end
   end
 end

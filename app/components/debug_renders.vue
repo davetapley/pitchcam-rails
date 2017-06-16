@@ -12,7 +12,9 @@
           <td>{{metaValue}}</td>
         </tr>
       </table>
-      <img :src="render.uri">
+      <span v-for="uri in render.uris">
+        <img :src="uri">
+      </span>
     </div>
   </div>
 </template>
@@ -34,17 +36,17 @@ export default {
     this.channel = this.$cable.subscriptions.create({ channel: 'DebugRenderChannel' }, {
       received (data) {
         const id = data.id
-        const uri = data.uri
+        const uris = Array.isArray(data.uri) ? data.uri : [data.uri]
         const lag = Date.now() - new Date(data.at)
         const meta = JSON.parse(data.meta || '{}')
 
         const render = that.renders[id]
 
         if (render === undefined) {
-          that.$set(that.renders, id, { lag, uri, meta })
+          that.$set(that.renders, id, { lag, uris, meta })
         } else {
           render.lag = lag
-          render.uri = uri
+          render.uris = uris
           render.meta = meta
         }
       }
