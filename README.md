@@ -1,24 +1,5 @@
-# README
+# PitchCam (Rails)
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Subject of [this talk](https://youtu.be/01CFyu3SuIo) at RailsConf 2017!
 
-Things you may want to cover:
-
-* Ruby version
-
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+Abandonded in favor of [Pitchskell](https://github.com/dukedave/pitchskell).
